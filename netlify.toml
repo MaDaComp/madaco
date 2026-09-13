@@ -1,0 +1,28 @@
+[build]
+  publish = "."
+  command = ""
+
+# /privacy/ en /aiscan/ werken vanzelf: Netlify serveert index.html uit een
+# submap voor een propere URL. Hieronder enkel wat extra headers.
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[redirects]]
+  from = "/ai-scan"
+  to = "/aiscan/"
+  status = 301
+
+[[redirects]]
+  from = "/ai-scan/*"
+  to = "/aiscan/:splat"
+  status = 301

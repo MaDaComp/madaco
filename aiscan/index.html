@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI-scans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+ --brand:#4F46E5; --brand-dk:#4338CA; --brand-lt:#EEF0FF; --brand-mid:#7C7BF0;
+ --navy:#0B2239; --ink:#1A2B42; --slate:#425466; --mute:#697386; --faint:#8A94A6;
+ --bg:#F6F9FC; --surface:#FFFFFF; --line:#E3E8EE; --line-soft:#EDF1F5;
+ --grid:rgba(66,84,102,.055);
+ --green:#0E7C66; --green-lt:#E6F4F1; --amber:#B45309; --amber-lt:#FDF3E7;
+ --r:10px; --r-lg:14px; --r-xl:18px; --sq:14px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;letter-spacing:-.006em}
+/* fijn geometrisch raster op de achtergrond */
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+ background-image:linear-gradient(var(--grid) 1px,transparent 1px),
+  linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+ background-size:56px 56px;background-position:center top;
+ -webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 35%,transparent 78%);
+ mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 35%,transparent 78%)}
+.wrap{position:relative;z-index:1;max-width:820px;margin:0 auto;padding:0 20px 100px}
+#pbar{position:fixed;top:0;left:0;height:2px;width:0;z-index:60;
+ background:linear-gradient(90deg,var(--brand),var(--brand-mid));transition:width .35s ease}
+
+/* ---------- hero ---------- */
+.hero{position:relative;margin:0 -20px 0;padding:76px 20px 60px;overflow:hidden;
+ background:linear-gradient(158deg,#0B2239 0%,#16325C 54%,#2E3E82 100%)}
+.hero::before{content:"";position:absolute;inset:0;opacity:.55;
+ background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);
+ background-size:56px 56px}
+.hero::after{content:"";position:absolute;inset:0;opacity:.55;
+ background:radial-gradient(900px 340px at 80% -10%,rgba(124,123,240,.5),transparent 62%),
+ radial-gradient(600px 280px at 4% 114%,rgba(79,70,229,.4),transparent 64%)}
+.hero>*{position:relative;z-index:1;max-width:660px;margin-left:auto;margin-right:auto}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;
+ letter-spacing:.06em;text-transform:uppercase;color:#A9AAF5;margin:0 0 20px;
+ padding:5px 12px 5px 9px;border:1px solid rgba(169,170,245,.32);border-radius:20px}
+.hero h1{font-size:clamp(31px,5.4vw,45px);line-height:1.13;letter-spacing:-.03em;
+ font-weight:700;color:#fff;margin:0 0 18px;max-width:18ch}
+.hero p{font-size:17.5px;line-height:1.62;color:#B6C2D4;margin:0;max-width:56ch}
+
+/* ---------- typografie ---------- */
+.eyebrow-b{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;
+ letter-spacing:.06em;text-transform:uppercase;color:var(--brand);margin:0 0 10px}
+h2{font-size:25px;line-height:1.25;letter-spacing:-.022em;font-weight:600;margin:0 0 8px}
+h3{font-size:17.5px;line-height:1.35;letter-spacing:-.014em;font-weight:600;margin:0 0 4px}
+.hint{font-size:15.5px;color:var(--mute);margin:0;max-width:60ch}
+.head{padding:54px 0 6px}
+
+/* ---------- squircle-iconen ---------- */
+.sq{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+ width:42px;height:42px;border-radius:var(--sq);border:1px solid var(--line);
+ background:var(--surface);color:var(--brand)}
+.sq svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.5;
+ stroke-linecap:round;stroke-linejoin:round}
+.sq.on{background:var(--brand-lt);border-color:#D5D8FB}
+.sq-sm{width:28px;height:28px;border-radius:9px}
+.sq-sm svg{width:15px;height:15px}
+.ico{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;
+ stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+
+/* ---------- bento ---------- */
+.bento{display:grid;border:1px solid var(--line);border-radius:var(--r-xl);
+ background:var(--surface);overflow:hidden;margin-top:18px}
+.bento>*{padding:26px 22px;border-left:1px solid var(--line)}
+.bento>*:first-child{border-left:none}
+.bento-3{grid-template-columns:repeat(3,1fr)}
+.bento-2{grid-template-columns:repeat(2,1fr)}
+.bento-1{grid-template-columns:1fr}
+@media(max-width:680px){
+ .bento-3,.bento-2{grid-template-columns:1fr}
+ .bento>*{border-left:none;border-top:1px solid var(--line)}
+ .bento>*:first-child{border-top:none}}
+
+/* hub-tegels */
+button.tile{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;
+ background:transparent;font:inherit;color:inherit;cursor:pointer;
+ transition:background .16s ease}
+button.tile:hover{background:#FBFCFE}
+button.tile:hover .sq{background:var(--brand-lt);border-color:#D5D8FB}
+button.tile:focus-visible{outline:2px solid var(--brand);outline-offset:-2px}
+.tile h3{margin:0}
+.tile p{margin:0;font-size:14.5px;color:var(--mute);line-height:1.55}
+.tile .meta{display:inline-flex;align-items:center;gap:6px;margin-top:auto;padding-top:6px;
+ font-size:13px;font-weight:600;color:var(--brand)}
+.tile.did .sq{background:var(--brand-lt);border-color:#D5D8FB}
+.pill{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.05em;
+ text-transform:uppercase;padding:3px 9px;border-radius:20px;
+ border:1px solid #D5D8FB;color:var(--brand-dk);background:var(--brand-lt)}
+
+/* ---------- panelen ---------- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);
+ padding:26px;margin-top:16px}
+.panel.accent{border-color:#D5D8FB;background:linear-gradient(180deg,#FCFCFF,#fff)}
+.phead{display:flex;align-items:flex-start;gap:14px;margin-bottom:6px}
+.phead h3{margin:0}
+.phead .sub{margin:2px 0 0;font-size:14px;color:var(--faint)}
+
+.block{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);
+ padding:24px;margin-top:16px}
+.block>.sub{font-size:14.5px;color:var(--faint);margin:0 0 4px}
+.qlabel{font-size:15px;font-weight:500;color:var(--slate);margin:20px 0 10px;
+ padding-top:18px;border-top:1px solid var(--line-soft)}
+.block .qlabel:first-of-type,.block>.phead+.qlabel{border-top:none;padding-top:0;margin-top:16px}
+.opt{display:flex;gap:11px;align-items:flex-start;padding:11px 13px;border:1px solid var(--line);
+ border-radius:var(--r);cursor:pointer;background:var(--surface);
+ transition:border-color .14s,background .14s}
+.opt+.opt{margin-top:7px}
+.opt:hover{border-color:#C7CEDA;background:#FBFCFE}
+.opt.on{border-color:var(--brand);background:var(--brand-lt);box-shadow:inset 0 0 0 1px var(--brand)}
+.opt input{position:absolute;opacity:0;width:0;height:0}
+.dot{flex:0 0 auto;width:16px;height:16px;margin-top:3px;border:1.5px solid #C0C8D4;
+ border-radius:50%;background:#fff;transition:border-color .14s,border-width .14s}
+.opt.on .dot{border-color:var(--brand);border-width:5px}
+.opt:focus-within{outline:2px solid var(--brand);outline-offset:2px}
+.opt .t{font-size:15px;line-height:1.45}
+
+/* ---------- formulier ---------- */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:560px){.fgrid{grid-template-columns:1fr}}
+.f label{display:block;font-size:13.5px;font-weight:500;color:var(--slate);margin-bottom:6px}
+.f input,.f select,textarea{width:100%;font-family:inherit;font-size:15.5px;color:var(--ink);
+ padding:11px 13px;border:1px solid var(--line);border-radius:var(--r);background:#fff;
+ transition:border-color .14s,box-shadow .14s}
+.f select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23697386' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+ background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
+textarea{min-height:78px;resize:vertical;line-height:1.55;margin-top:6px}
+.f input:focus,.f select:focus,textarea:focus{outline:none;border-color:var(--brand);
+ box-shadow:0 0 0 3px rgba(79,70,229,.13)}
+.req{font-size:13.5px;margin:0 0 18px;color:var(--faint)}
+.check{display:flex;gap:11px;align-items:flex-start;margin-top:16px;cursor:pointer}
+.check input{position:absolute;opacity:0;width:0;height:0}
+.cbox{flex:0 0 auto;width:18px;height:18px;margin-top:2px;border:1.5px solid #C0C8D4;
+ border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center;transition:all .14s}
+.check.on .cbox{background:var(--brand);border-color:var(--brand)}
+.cbox svg{width:11px;height:11px;stroke:#fff;stroke-width:2.6;fill:none;
+ stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.check.on .cbox svg{opacity:1}
+.check>span:last-child{font-size:14px;color:var(--mute);line-height:1.5}
+.check:focus-within .cbox{box-shadow:0 0 0 3px rgba(79,70,229,.13)}
+
+/* ---------- knoppen ---------- */
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding-top:26px}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-size:15px;
+ font-weight:600;padding:11px 20px;border-radius:var(--r);cursor:pointer;
+ border:1px solid transparent;transition:all .16s ease}
+.btn-p{background:var(--brand);color:#fff;border-color:var(--brand)}
+.btn-p:hover{background:var(--brand-dk);border-color:var(--brand-dk)}
+.btn-p .ico{stroke-width:1.9;transition:transform .16s ease}
+.btn-p:hover .ico{transform:translateX(3px)}
+.btn-s{background:transparent;color:var(--slate);border-color:var(--line)}
+.btn-s:hover{border-color:#B9C3D1;color:var(--ink);background:#FBFCFE}
+.btn{text-decoration:none}
+a.btn-p{color:#fff}
+.btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.note{font-size:13.5px;color:var(--faint)}
+.err{color:#B42318;font-size:14px;margin-top:12px}
+
+/* ---------- statistieken (bento) ---------- */
+.stat{display:flex;flex-direction:column;align-items:center;text-align:center;gap:9px}
+.stat .n{font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1;margin:0;
+ background:linear-gradient(135deg,var(--brand),var(--brand-mid));
+ -webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .n em{font-style:normal;font-size:21px;font-weight:600;letter-spacing:-.01em;margin-left:1px}
+.stat .l{font-size:14px;font-weight:500;color:var(--ink);margin:0;line-height:1.4;max-width:26ch}
+.stat .k{font-size:12.5px;color:var(--faint);margin:0;line-height:1.45;max-width:30ch}
+.track{width:100%;max-width:180px;height:4px;background:var(--line-soft);
+ border-radius:3px;margin-top:2px;overflow:hidden}
+.track i{display:block;height:100%;width:0;border-radius:3px;
+ background:linear-gradient(90deg,var(--brand),var(--brand-mid));
+ transition:width .9s cubic-bezier(.22,.7,.28,1)}
+
+/* ---------- bewaarstrook en opsomming ---------- */
+.keep{display:flex;gap:11px;align-items:flex-start;margin-top:14px;padding:13px 15px;
+ border:1px solid #F0DDC2;background:var(--amber-lt);border-radius:var(--r-lg);
+ font-size:14.5px;color:var(--amber);line-height:1.5}
+.keep .ico{margin-top:3px;stroke-width:1.8}
+.keep.done{border-color:#BFE0D8;background:var(--green-lt);color:var(--green)}
+@media(max-width:680px){
+ .bento>.stat{padding:20px 22px}
+ .stat .n{font-size:34px}
+ .stat .n em{font-size:19px}
+ .stat .l,.stat .k{max-width:none}}
+.lnk{background:none;border:none;padding:0;font:inherit;font-weight:600;color:inherit;
+ text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.lnk:hover{text-decoration-thickness:2px}
+.lnk:focus-visible{outline:2px solid currentColor;outline-offset:2px;border-radius:3px}
+ul.buit{list-style:none;margin:16px 0 20px;padding:0}
+ul.buit li{display:flex;gap:11px;align-items:flex-start;font-size:14.5px;color:var(--slate);
+ line-height:1.55;margin-top:9px}
+ul.buit li .ico{flex:0 0 auto;margin-top:4px;width:15px;height:15px;color:var(--brand);stroke-width:2}
+
+/* ---------- resultaten ---------- */
+.res{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);
+ padding:22px 24px;margin-top:12px}
+.res>h4{font-size:16px;font-weight:600;margin:0 0 8px;display:flex;align-items:center;
+ gap:10px;flex-wrap:wrap}
+.res p{margin:0;font-size:15px;color:var(--mute);line-height:1.6}
+.res p+p{margin-top:8px}
+.res b{color:var(--ink);font-weight:600}
+.res i{color:var(--faint);font-style:normal;font-size:14px}
+.lbl{display:flex!important;align-items:center;gap:8px;font-size:12px!important;
+ font-weight:600!important;letter-spacing:.055em;text-transform:uppercase;
+ color:var(--slate)!important;margin:20px 0 10px!important;
+ padding-top:16px;border-top:1px solid var(--line-soft)}
+.res>.lbl:first-of-type{border-top:none;padding-top:0;margin-top:14px!important}
+.tag{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+ padding:3px 9px;border-radius:20px;white-space:nowrap;border:1px solid}
+.t-do{background:var(--green-lt);color:var(--green);border-color:#BFE0D8}
+.t-clean{background:var(--amber-lt);color:var(--amber);border-color:#F0DDC2}
+.t-low{background:#F4F7FA;color:var(--mute);border-color:var(--line)}
+.rank{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+ width:27px;height:27px;border-radius:9px;border:1px solid #D5D8FB;
+ background:var(--brand-lt);color:var(--brand-dk);font-size:13px;font-weight:700}
+ol.steps{margin:0;padding-left:0;list-style:none;counter-reset:s}
+ol.steps li{position:relative;counter-increment:s;padding-left:34px;font-size:15px;
+ color:var(--mute);line-height:1.6;margin-bottom:10px}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:1px;
+ width:22px;height:22px;border-radius:7px;border:1px solid var(--line);
+ display:flex;align-items:center;justify-content:center;
+ font-size:11.5px;font-weight:700;color:var(--brand)}
+.prompt{position:relative;background:#0B2239;border:1px solid #1D3554;
+ border-radius:var(--r-lg);padding:16px 18px;margin-top:2px;overflow:hidden}
+.prompt::before{content:"";position:absolute;inset:0;opacity:.5;pointer-events:none;
+ background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:28px 28px}
+.prompt pre{position:relative;margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+ font-size:13.5px;line-height:1.62;color:#D7E0EC;white-space:pre-wrap;word-break:break-word}
+.copy{position:absolute;top:11px;right:11px;z-index:2;display:inline-flex;align-items:center;
+ gap:6px;font-family:inherit;font-size:12px;font-weight:600;padding:6px 11px;border-radius:8px;
+ cursor:pointer;background:transparent;color:#AEBDD0;border:1px solid rgba(255,255,255,.2)}
+.copy:hover{border-color:rgba(255,255,255,.42);color:#fff}
+.copy .ico{width:13px;height:13px}
+
+.quad{width:100%;height:auto;margin:16px 0 12px;background:var(--surface);
+ border:1px solid var(--line);border-radius:var(--r-xl)}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+ border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--surface)}
+.legend span{display:flex;align-items:center;gap:9px;padding:11px 14px;font-size:14px;
+ color:var(--mute);border-left:1px solid var(--line);border-top:1px solid var(--line)}
+.legend span:nth-child(-n+2){border-top:none}
+@media(max-width:600px){.legend span{border-left:none}.legend span:nth-child(2){border-top:1px solid var(--line)}}
+.legend b{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;
+ border-radius:7px;border:1px solid var(--line);color:var(--ink);font-size:12px;font-weight:700}
+.locked{position:relative;max-height:240px;overflow:hidden;margin-top:12px}
+.locked::after{content:"";position:absolute;inset:0;
+ background:linear-gradient(180deg,rgba(246,249,252,0),rgba(246,249,252,.9) 58%,var(--bg))}
+.hidden{display:none}
+footer{display:flex;align-items:center;gap:12px;padding:28px 0 0;margin-top:48px;
+ border-top:1px solid var(--line);font-size:13.5px;color:var(--faint)}
+@media print{.actions,.noprint,#pbar,.copy{display:none!important}
+ body{background:#fff}body::before{display:none}
+ .prompt{background:#F4F7FA;border-color:var(--line)}.prompt pre{color:#1A2B42}
+ .prompt::before{display:none}
+ .hero{background:#0B2239!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .res,.panel,.bento,.block{break-inside:avoid}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="pbar"></div>
+<div class="wrap"><div id="root"></div>
+<footer><span class="sq sq-sm"><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg></span>
+<span>Drie scans om te bepalen waar AI vandaag iets oplevert: voor jou, voor je bedrijf, en voor het kader eronder.</span></footer></div>
+<script>
+/* ====== SCAN 1: ROLLEN ======
+   fit 3 = goed te ondersteunen · 2 = deels · 1 = niet doen
+   s = stappen · pr = voorbeeldprompt · g = wanneer het bouwwerk wordt */
+const TIMEQ="Hoeveel tijd kost dit jou in een gemiddelde werkweek?";
+const TIME=["Zo goed als niets","Minder dan een uur","Een paar uur","Een halve dag of meer"];
+
+const ROLES=[
+{n:"Zaakvoerder of directie",tasks:[
+{n:"Cijfers opvragen en samenleggen",vec:[2,3,3,1,1],bo:"Een gebouwde versie haalt de cijfers zelf op uit je boekhouding, je verkoopsysteem en je planning, draait elke maandagochtend vanzelf en meldt alleen wat afwijkt van normaal. Ze kan er ook de vragen bij zetten die je die week aan je team zou moeten stellen.",w:"Je wil weten hoe het bedrijf ervoor staat en moet daarvoor cijfers uit verschillende systemen bij elkaar halen. Vaak vraag je ze op bij je boekhouder of bij iemand van je team.",fit:3,
+ u:"Je laat de AI je maandcijfers doorlichten in plaats van ze zelf te vergelijken.",
+ s:["Exporteer je omzet- en kostenoverzicht van vorige maand als Excel of CSV uit je boekhoudpakket.","Upload dat bestand in ChatGPT, Claude of Copilot.","Plak de prompt hieronder en pas de maand aan."],
+ pr:"Hierbij mijn omzet- en kostenoverzicht van [maand]. Geef me:\n1. De vijf grootste afwijkingen tegenover de maand ervoor, in een tabel.\n2. Per afwijking een mogelijke verklaring.\n3. Drie vragen die ik hierover aan mijn team moet stellen.\nHou het kort. Geen algemene adviezen, alleen wat je in de cijfers ziet.",
+ g:"Om dit elke maandag vanzelf klaar te hebben, moet je je boekhoudpakket en je verkoopsysteem laten uitlezen. Daarvoor heb je toegang nodig tot die systemen (een API of een automatische export) en een koppeltool zoals Make of n8n die alles samenbrengt. Reken op één à twee weken werk, en op iemand die het nadien onderhoudt."},
+{n:"Mail lezen, sorteren en beantwoorden",vec:[2,1,1,3,0],bo:"Een gebouwde versie leest mee in je inbox, zet erbij wie de afzender is en wat er bij die klant openstaat, markeert wat echt dringend is en zet een concept klaar. Verzenden blijft altijd aan jou.",w:"Dit is alle tijd die je kwijt bent aan je inbox. Doorworstelen wat er binnenkomt, beslissen wat dringend is en zelf antwoorden schrijven.",fit:3,
+ u:"Lange mails samenvatten en er meteen een concept-antwoord bij krijgen.",
+ s:["Zoek de vijf langste mails van deze week in je inbox.","Plak er één in je AI-tool met onderstaande prompt.","Doe dit een week lang bij elke mail die langer is dan een scherm."],
+ pr:"Vat deze mail samen in maximaal drie zinnen. Zeg daarna:\n- Wat wordt er van mij verwacht?\n- Tegen wanneer?\n- Wat gebeurt er als ik niet reageer?\nSchrijf tot slot een kort concept-antwoord in een zakelijke, directe toon. Geen beleefdheidsformules.\n\nMail:\n[plak hier]",
+ g:"Automatisch sorteren of klantgegevens uit je CRM erbij halen vraagt toegang tot je mailomgeving én je CRM, plus een koppeltool die de twee verbindt. Dat is werk van één à twee weken. Laat sowieso nooit automatisch mail verplaatsen of archiveren."},
+{n:"Opvolgen wat je toegezegd hebt",vec:[3,1,1,3,0],bo:"Een gebouwde versie houdt permanent bij wat er beloofd is, herkent nieuwe toezeggingen in je mail en je vergaderingen, en brengt in kaart welke deliverables er lopen met wie ervoor verantwoordelijk is. Ze herinnert je op tijd en kan de opvolgvraag alvast klaarzetten naar wie jou iets verschuldigd is.",w:"Dit gaat over bijhouden wat jij beloofd hebt aan klanten, leveranciers en medewerkers, en wat anderen aan jou beloofd hebben.",fit:3,
+ u:"Uit je verzonden mail halen wat je beloofd hebt, met deadline.",
+ s:["Open je map Verzonden en selecteer de mails van de afgelopen twee weken.","Kopieer ze in één blok naar je AI-tool.","Vraag de toezeggingen eruit met onderstaande prompt."],
+ pr:"Hieronder staan mijn verzonden mails van de voorbije twee weken. Haal er alles uit wat ik heb toegezegd of beloofd.\nGeef een tabel met: wat, aan wie, tegen wanneer (of 'geen datum genoemd').\nSorteer op deadline, dringendste eerst. Laat weg wat geen echte toezegging is.\n\n[plak hier]",
+ g:"Om dit wekelijks vanzelf te krijgen, moet je mailbox, agenda en CRM aan elkaar hangen. Dat vraagt toegang tot elk van die drie en een koppeltool ertussen. Reken op één à twee weken."},
+{n:"Vergaderingen voorbereiden en opvolgen",vec:[2,1,2,3,1],bo:"Een gebouwde versie bereidt elk overleg voor met de openstaande punten uit de vorige keer, schrijft achteraf de besluitenlijst en blijft daarna bewaken welke acties niet gebeuren. Ze komt erop terug zonder dat jij het moet vragen.",w:"Dit is het werk rond de vergadering zelf. Je voorbereiden, noteren wat er beslist is, en achteraf nagaan of de afspraken ook uitgevoerd worden.",fit:3,
+ u:"Van een opname naar een besluitenlijst met eigenaars en deadlines.",
+ s:["Neem je volgende intern overleg op. Zeg vooraf tegen iedereen dat je opneemt.","Laat het transcript maken door je opnametool of door de AI zelf.","Vraag geen samenvatting maar een besluitenlijst."],
+ pr:"Dit is het transcript van een intern overleg. Geef me:\n1. Genomen beslissingen, elk in één zin.\n2. Acties: wat, wie, tegen wanneer.\n3. Open punten waar niemand eigenaar van is.\nGeen samenvatting van de discussie, alleen de uitkomst.\n\n[plak transcript]",
+ g:"Kijk eerst of je Microsoft- of Google-licentie dit al bevat, want vaak betaal je er al voor. Wil je het gekoppeld aan je projecten of je CRM, dan wordt het complexer: dan heb je toegang nodig tot die systemen en een koppeling ertussen."},
+{n:"Documenten en contracten doornemen",vec:[1,3,3,1,2],bo:"Een gebouwde versie bewaakt al je contracten samen: looptijden, indexeringen en opzegtermijnen, met een melding ruim voor de datum verstrijkt. Nieuwe contracten worden automatisch vergeleken met wat je eerder tekende.",w:"Denk aan contracten, offertes van leveranciers, verzekeringspolissen en alles wat je grondig moet lezen voor je tekent.",fit:3,
+ u:"Een contract laten uitpluizen op de punten die tegen je werken.",
+ s:["Neem het contract dat nu op je bureau ligt, als PDF.","Upload het.","Zeg erbij of je koper of verkoper bent, want dat verandert het antwoord volledig."],
+ pr:"Lees dit contract. Ik ben de [koper / leverancier]. Geef me:\n1. Looptijd, opzegtermijn en indexeringsclausule.\n2. De drie bepalingen die het meest in mijn nadeel zijn, met uitleg waarom.\n3. Wat ik concreet zou vragen aan te passen.\nMarkeer met [ONZEKER] wat je niet met zekerheid uit de tekst haalt.",
+ g:"Per contract blijft dit handwerk, en dat is prima. Wil je al je contracten automatisch bewaken op vervaldata en indexeringen, dan wordt het complexer: je contracten moeten op één plek staan en er moet een koppeling zijn met je agenda of je takenlijst. Reken op enkele dagen."},
+{n:"Mensen aansturen en knopen doorhakken",vec:[0,1,3,3,0],w:"Dit is het eigenlijke leidinggeven. Gesprekken voeren, richting geven en beslissingen nemen waar niemand anders over gaat.",fit:1,
+ u:"Hier valt niets te automatiseren, en dat moet je ook niet willen.",
+ s:[],pr:"",g:"Investeer hier in beter cijfermateriaal vooraf, niet in de beslissing zelf. Er valt niets te bouwen, en dat hoeft ook niet."}]},
+
+{n:"Verkoop of accountmanagement",tasks:[
+{n:"Offertes opmaken",vec:[2,2,1,2,2],bo:"Een gebouwde versie trekt de juiste prijzen uit je prijslijst en de historiek uit je klantensysteem, en zet een volledige concept-offerte klaar zodra er een aanvraag binnenkomt. Ze bewaakt daarna ook welke offertes te lang blijven liggen.",w:"Dit is alles tussen een klantvraag en een verstuurde offerte. Prijzen opzoeken, voorwaarden bepalen en het document zelf opstellen.",fit:3,
+ u:"Een eerste versie laten schrijven op basis van offertes die je gewonnen hebt.",
+ s:["Zoek drie offertes op die je effectief hebt binnengehaald.","Upload ze samen in één gesprek.","Vraag een nieuwe in dezelfde structuur en laat de prijzen open."],
+ pr:"Dit zijn drie offertes die wij gewonnen hebben. Analyseer de structuur en de toon.\nSchrijf nu op exact dezelfde manier een offerte voor:\n- Klant: [naam en sector]\n- Vraag: [wat ze willen]\n- Bijzonderheden: [termijn, voorwaarden]\nLaat alle bedragen leeg als [PRIJS INVULLEN]. Verzin geen technische specificaties.",
+ g:"Een echte offertemotor haalt zelf de juiste prijzen uit je prijslijst en de historiek uit je CRM. Daarvoor heb je toegang nodig tot beide systemen en een koppeltool ertussen. Reken op één à twee weken, en op een propere prijslijst als voorwaarde."},
+{n:"Bezoekverslagen en CRM bijwerken",vec:[3,1,0,2,1],bo:"Een gebouwde versie zet je gesprek automatisch om in een verslag en vult de velden in je klantensysteem zelf in. Je krijgt het ter goedkeuring in plaats van dat je het moet intikken.",w:"Na een klantbezoek of een gesprek noteren wat er gezegd is, en dat vervolgens invoeren in je klantensysteem.",fit:3,
+ u:"Van gespreksopname naar verslag en ingevulde CRM-velden.",
+ s:["Neem je volgende klantgesprek op, met toestemming van de klant.","Zet het om naar tekst.","Vraag geen verhaal maar velden."],
+ pr:"Dit is een verkoopgesprek. Geef me:\n1. Verslag van maximaal acht regels.\n2. Volgende stappen met datum en wie ze doet.\n3. Genoemde pijnpunten, letterlijk zoals de klant ze zei.\n4. Budget, timing en beslisser, maar enkel als het echt vermeld is. Schrijf anders 'niet genoemd'.\n\n[plak transcript]",
+ g:"Het verslag rechtstreeks in je CRM laten belanden vraagt schrijftoegang tot dat CRM en een koppeling met je opnametool. Reken op ongeveer een week."},
+{n:"Opvolgmails na offerte of demo",vec:[3,1,0,3,0],bo:"Een gebouwde versie start vanzelf zodra je een offerte verstuurt, weet hoelang die al openstaat en stelt op het juiste moment een opvolgbericht voor met verwijzing naar wat er in het gesprek gezegd is.",w:"Dit zijn de berichten die je stuurt nadat je iets voorgesteld hebt, om het gesprek levend te houden tot er een beslissing valt.",fit:3,
+ u:"Een opvolgmail die naar het gesprek verwijst in plaats van een sjabloon.",
+ s:["Neem je gespreksnotities of het transcript erbij.","Plak ze met onderstaande prompt.","Pas altijd één zin zelf aan voor je verstuurt."],
+ pr:"Schrijf een opvolgmail na dit gesprek. Voorwaarden:\n- Maximaal 120 woorden.\n- Verwijs naar twee concrete dingen die de klant zelf zei.\n- Geen verkooppraat, geen superlatieven.\n- Eindig met één duidelijke volgende stap en een voorstel van datum.\n\nGesprek:\n[plak hier]",
+ g:"Een opvolgreeks die vanzelf start zodra je een offerte verstuurt, moet weten wanneer dat gebeurd is. Dat vraagt toegang tot je CRM of je offertesysteem en een koppeling met je mail. Reken op ongeveer een week."},
+{n:"Prospects opzoeken en voorbereiden",vec:[1,3,1,2,1],bo:"Een gebouwde versie kijkt in je agenda, ziet welk bezoek eraan komt en zet de briefing klaar voor je vertrekt. Ze haalt daarbij ook de openstaande facturen en de laatste contacten uit je eigen systemen.",w:"Uitzoeken wie je gaat bezoeken voor je vertrekt. Wat het bedrijf doet, wie er beslist en wat er bij hen speelt.",fit:3,
+ u:"Eén briefing per bezoek in plaats van tien minuten zoeken.",
+ s:["Gebruik een AI-tool die op het web kan zoeken.","Geef bedrijfsnaam en website mee.","Doe dit vlak voor je vertrekt, niet dagen op voorhand."],
+ pr:"Maak een briefing van één pagina voor mijn bezoek bij [bedrijfsnaam], [website].\nGeef: activiteit in twee zinnen, grootte, recente nieuwsberichten van het afgelopen jaar, wie de leiding heeft.\nEindig met drie vragen die ik zou stellen op basis van wat je vond.\nZeg expliciet wat je niet hebt kunnen vinden.",
+ g:"Om de briefing vanzelf klaar te hebben voor elk bezoek, moet je agenda uitgelezen worden en gekoppeld aan een zoekopdracht. Dat vraagt toegang tot je agenda en een koppeltool. Reken op ongeveer een week."},
+{n:"Aanbestedingen en vragenlijsten invullen",vec:[2,3,1,1,3],bo:"Een gebouwde versie bouwt een doorzoekbare bibliotheek van al jullie eerdere antwoorden, zodat een nieuwe vragenlijst voor het grootste deel automatisch ingevuld wordt. Het hele team kan erbij, niet alleen jij.",w:"Lange vragenlijsten van klanten of overheden beantwoorden, vaak met informatie die je al eens eerder hebt aangeleverd.",fit:3,
+ u:"Nieuwe vragen beantwoorden met antwoorden uit oude dossiers.",
+ s:["Verzamel je vijf laatste ingevulde vragenlijsten in één document.","Upload dat samen met de nieuwe lijst.","Loop de gemarkeerde punten zelf na."],
+ pr:"Bestand 1 bevat vragenlijsten die wij eerder hebben ingevuld. Bestand 2 is een nieuwe lijst.\nBeantwoord de nieuwe vragen op basis van onze eerdere antwoorden.\nMarkeer met [CONTROLEREN] elk antwoord waar je niet zeker van bent of waar de vraag anders is dan eerder.\nVerzin nooit cijfers, certificaten of referenties.",
+ g:"Een antwoordbibliotheek voor het hele team moet ergens staan waar iedereen bij kan, en actueel blijven. Dat vraagt een gedeelde opslagplaats, toegangsrechten per persoon en iemand die ze bijhoudt. Reken op één à twee weken."},
+{n:"Onderhandelen en relatie onderhouden",vec:[0,1,2,3,0],w:"Dit is het gesprek zelf. Prijzen bespreken, bezwaren opvangen en de band met je klant onderhouden.",fit:1,
+ u:"Niet te automatiseren.",s:[],pr:"",
+ g:"Gebruik het hoogstens om scenario's door te rekenen vóór het gesprek. Hier valt niets te bouwen, en dat is ook niet erg."}]},
+
+{n:"Finance of administratie",tasks:[
+{n:"Inkomende facturen verwerken",vec:[3,1,0,0,0],bo:"Een gebouwde versie trekt facturen automatisch uit je mailbox of je scanmap, leest ze uit, matcht ze met de bestelbon en zet ze klaar ter goedkeuring in je boekhoudpakket.",w:"Facturen van leveranciers openen, controleren, coderen en klaarzetten om in te boeken.",fit:3,
+ u:"Facturen laten uitlezen naar een tabel die je kan inboeken.",
+ s:["Neem vijf inkomende facturen als PDF.","Upload ze samen.","Vergelijk het resultaat met wat je zelf zou inboeken."],
+ pr:"Haal uit elke bijgevoegde factuur: leverancier, factuurnummer, factuurdatum, vervaldatum, bedrag exclusief btw, btw-bedrag, totaal, en het btw-nummer.\nGeef alles in één tabel, één regel per factuur.\nZet [ONLEESBAAR] waar je iets niet met zekerheid kan lezen. Verzin nooit een bedrag.",
+ g:"Facturen automatisch inlezen en matchen met de bestelbon vraagt toegang tot je boekhoudpakket (een API of een importmap) en een koppeltool die de scanstroom binnentrekt. Reken op één à twee weken, en laat de goedkeuring altijd bij een mens."},
+{n:"Openstaande facturen opvolgen",vec:[3,1,1,2,0],bo:"Een gebouwde versie kent je openstaande posten, weet hoe elke klant doorgaans betaalt en stuurt op het juiste moment de juiste toon. Escaleert vanzelf wanneer er niets gebeurt, en houdt jou op de hoogte.",w:"Nagaan welke klanten nog niet betaald hebben, en hen daar op tijd aan herinneren.",fit:3,
+ u:"Drie versies van een herinnering, zodat je niet elke keer opnieuw formuleert.",
+ s:["Neem één openstaande factuur als voorbeeld.","Vraag de drie versies.","Bewaar ze als sjabloon en pas ze aan per klant."],
+ pr:"Schrijf drie versies van een betalingsherinnering in het Nederlands voor een factuur van [bedrag] die [aantal] dagen vervallen is.\n1. Vriendelijk, eerste herinnering, veronderstelt dat het vergeten is.\n2. Zakelijk, tweede herinnering, met vermelding van de vervaldatum.\n3. Laatste aanmaning, met aankondiging van verdere stappen.\nElk maximaal 100 woorden. Geen juridisch jargon behalve in de derde.",
+ g:"Automatisch herinneren vraagt dat je systeem weet wat er openstaat en hoelang. Dat betekent toegang tot je boekhoudpakket en een koppeling met je mail. Reken op één à twee weken. Laat de eerste maanden elke mail nog langs een mens gaan."},
+{n:"Rapporten en overzichten maken",vec:[2,3,3,1,1],bo:"Een gebouwde versie haalt je cijfers vanzelf op en zet het overzicht elke maand klaar, met de afwijkingen gemarkeerd. Je kan er bovendien in gewone taal vragen aan blijven stellen.",w:"Cijfers uit je boekhouding halen en er een leesbaar overzicht van maken voor de directie of voor jezelf.",fit:3,
+ u:"Vragen stellen aan je grootboek in plaats van draaitabellen bouwen.",
+ s:["Exporteer je grootboek of kostenoverzicht als CSV.","Upload het.","Stel je vraag in gewone taal."],
+ pr:"Dit is onze grootboekexport. Geef me:\n1. De tien grootste kostenposten met bedrag.\n2. Wat het sterkst gestegen is tegenover dezelfde periode vorig jaar, in procent en in euro.\n3. Drie posten die onregelmatig of ongewoon ogen, met uitleg waarom.\nControleer je eigen optellingen voor je antwoordt.",
+ g:"Wekelijks en altijd actueel vraagt leestoegang tot je boekhoudpakket en een koppeltool die de export automatisch ophaalt. Reken op één à twee weken."},
+{n:"Gegevens overtypen tussen systemen",vec:[3,0,0,0,0],bo:"Hier is de gebouwde versie geen AI maar een koppeling tussen beide systemen. Die is goedkoper, sneller en betrouwbaarder, en ze maakt nul fouten.",w:"Dezelfde informatie een tweede keer invoeren omdat twee programma's niet met elkaar praten.",fit:2,
+ u:"Dit is meestal geen AI-probleem maar een ontbrekende koppeling.",
+ s:["Noteer een week lang wat je overtypt, van welk systeem naar welk.","Tel hoeveel keer per week.","Vraag beide leveranciers of ze een koppeling of export aanbieden."],
+ pr:"",
+ g:"Als het altijd dezelfde velden zijn, is een koppeling het juiste antwoord en geen AI. Dat is goedkoper, sneller en betrouwbaarder. Je hebt er wel toegang voor nodig tot beide systemen, dus vraag je leveranciers of ze een API aanbieden en wat die kost."},
+{n:"Kosten en abonnementen controleren",vec:[2,2,2,0,0],bo:"Een gebouwde versie kijkt elke maand mee in je grootboek en meldt nieuwe terugkerende betalingen, prijsstijgingen en contracten die stilzwijgend verlengen, voor de vervaldatum in plaats van erna.",w:"Nakijken waar het geld naartoe gaat. Terugkerende betalingen, licenties en contracten die stilzwijgend verlengen.",fit:3,
+ u:"Terugkerende betalingen blootleggen die niemand nog opvolgt.",
+ s:["Exporteer twaalf maanden bankuittreksels of grootboek als CSV.","Upload het.","Loop de lijst af met de vraag: gebruiken we dit nog?"],
+ pr:"Zoek in deze uittreksels alle terugkerende betalingen.\nGeef per abonnement: begunstigde, bedrag, frequentie, jaartotaal, en of het bedrag in de loop van het jaar gestegen is.\nSorteer op jaartotaal, hoogste eerst.\nZet onderaan apart: betalingen die maar één of twee keer voorkwamen.",
+ g:"Eenmalig volstaat hier meestal, dus hier hoef je niets te bouwen. Zet gewoon een herinnering om het volgend jaar opnieuw te doen."},
+{n:"Vragen van collega's beantwoorden",vec:[1,2,0,2,3],bo:"Een gebouwde versie staat op een plek waar iedereen bij kan en antwoordt zelf, met verwijzing naar de juiste procedure. Jij komt pas in beeld voor wat er echt niet in staat.",w:"Collega's die bij jou komen vragen hoe iets zit. Een onkostenregel, een procedure of een termijn.",fit:3,
+ u:"Een vraagbaak op jullie eigen regels en procedures.",
+ s:["Verzamel de documenten waar de vragen over gaan in één PDF.","Upload ze en plak de instructie hieronder.","Test met vijf vragen waarvan je het antwoord kent."],
+ pr:"Dit zijn onze interne procedures. Vanaf nu beantwoord je vragen enkel op basis van deze documenten.\nRegels:\n- Staat het antwoord er niet in, zeg dan: 'Dat staat niet in de documenten.'\n- Verwijs bij elk antwoord naar de paragraaf of pagina.\n- Verzin nooit een regel of bedrag.\nEerste vraag: [stel je vraag]",
+ g:"Een vraagbaak voor het hele team moet op een gedeelde plek staan, met de juiste toegangsrechten, en de documenten moeten actueel blijven. Dat vraagt toegang tot je documentopslag en iemand die het beheert. Reken op één à twee weken."}]},
+
+{n:"Operations of productie",tasks:[
+{n:"Orders inlezen en invoeren",vec:[3,1,0,1,0],bo:"Een gebouwde versie haalt bestellingen automatisch uit je mailbox, leest ze uit en zet ze klaar in je ordersysteem. Afwijkingen worden apart gelegd voor een mens, de rest loopt door.",w:"Bestellingen die per mail of als pdf binnenkomen, overnemen in je ordersysteem.",fit:3,
+ u:"Bestelmails en PDF's omzetten naar gestructureerde gegevens.",
+ s:["Neem vijf recente bestelmails of bestelbonnen.","Upload of plak ze.","Vergelijk de tabel met wat je zelf zou invoeren."],
+ pr:"Haal uit deze bestelling de gegevens:\nklant, klantreferentie, besteldatum, gewenste leverdatum, leveradres, en per artikel: omschrijving, artikelnummer, aantal, eenheid.\nGeef één tabel. Zet [ONTBREEKT] waar iets niet vermeld is. Verzin geen artikelnummers.\n\n[plak of upload]",
+ g:"Orders rechtstreeks in je systeem laten belanden vraagt schrijftoegang tot dat ordersysteem en een koppeling met je mailbox. Reken op één à twee weken, en laat afwijkingen altijd langs een mens gaan."},
+{n:"Werkbonnen en verslagen verwerken",vec:[3,1,0,1,1],bo:"Een gebouwde versie laat de technieker inspreken of een kort formulier invullen op zijn telefoon, en zet dat om in een volledige registratie in je systeem. Hij hoeft niets meer uit te typen.",w:"Wat techniekers of ploegen in het veld noteren, omzetten naar een registratie die je verder kan gebruiken.",fit:3,
+ u:"Een verslag in gewone taal omzetten naar een bruikbare registratie.",
+ s:["Neem een werkverslag zoals een technieker het vandaag doorstuurt.","Plak het met onderstaande prompt.","Laat de technieker het resultaat één keer nakijken."],
+ pr:"Zet dit werkverslag om naar een gestructureerde registratie:\ndatum, uitvoerder, klant, uitgevoerde werken (opsomming), gebruikte materialen met aantal, gewerkte uren, opmerkingen voor de volgende interventie.\nVerzin niets bij. Wat er niet in staat, laat je leeg.\n\n[plak verslag]",
+ g:"Dit rechtstreeks vanuit een spraakbericht of een formulier op de telefoon laten binnenkomen vraagt een koppeltool en toegang tot je registratiesysteem. Reken op enkele dagen tot een week."},
+{n:"Planning maken en aanpassen",vec:[1,2,3,1,2],bo:"Een gebouwde versie kent je capaciteit en je orders, en stelt een planning voor zodra er iets wijzigt. De planner beoordeelt en beslist, maar begint niet meer van een leeg blad.",w:"Bepalen wie wat wanneer doet, en die planning telkens bijsturen zodra er iets wijzigt.",fit:2,
+ u:"Hier moet je opletten: planning vraagt betrouwbare capaciteits- en orderdata.",
+ s:["Test eerst of je capaciteitsgegevens kloppen: klopt de geplande tijd met de werkelijke?","Zo niet, begin daar.","Zo ja, laat een AI een voorstel doen dat je planner beoordeelt."],
+ pr:"",
+ g:"Doe dit pas als je registratie en je orderdata betrouwbaar zijn, anders bouw je op zand. Is dat in orde, dan wordt het alsnog complex: planning vraagt toegang tot je capaciteits- en orderdata en een koppeling tussen beide. Dit is geen project voor je eerste jaar."},
+{n:"Status opvragen en doorgeven",vec:[3,0,0,3,0],bo:"Een gebouwde versie beantwoordt statusvragen rechtstreeks vanuit je ordersysteem, of het nu een klant is die mailt of een collega die belt. De vraag komt niet meer bij een mens terecht.",w:"Vragen beantwoorden over waar een order of een werk staat, zowel intern als van klanten.",fit:3,
+ u:"Statusvragen wegnemen bij de mensen die ze nu beantwoorden.",
+ s:["Tel deze week hoeveel statusvragen er binnenkomen, en van wie.","Kijk of het antwoord altijd uit hetzelfde systeem komt.","Is dat zo, dan is dit je beste kandidaat."],
+ pr:"",
+ g:"Meet eerst het volume, anders bouw je voor niets. Daarna wordt het complexer: automatisch antwoorden vraagt leestoegang tot je ordersysteem en een koppeling met je mail of je website. Reken op één à twee weken."},
+{n:"Procedures en specificaties opzoeken",vec:[1,2,0,0,3],bo:"Een gebouwde versie staat op tablet op de werkvloer en antwoordt in korte stappen, altijd op basis van de actuele documenten. Wie iets niet vindt, moet niemand meer storen.",w:"Werkinstructies, tekeningen of specificaties terugvinden op het moment dat iemand op de vloer ze nodig heeft.",fit:3,
+ u:"Werkinstructies doorzoekbaar maken in gewone taal.",
+ s:["Kies één machine of één proces en verzamel de actuele documentatie.","Gooi verouderde versies weg voor je uploadt.","Test met vragen die operatoren echt stellen."],
+ pr:"Dit is onze werkinstructie. Beantwoord vragen van operatoren enkel op basis van dit document.\nRegels:\n- Antwoord in korte genummerde stappen.\n- Staat het er niet in, zeg dan: 'Dat is niet beschreven. Vraag het aan je ploegbaas.'\n- Verzin nooit een instelling, waarde of veiligheidsvoorschrift.\nEerste vraag: [stel je vraag]",
+ g:"Voor de hele werkvloer, op tablet, vraagt dit een gedeelde omgeving, toegangsrechten en documenten die actueel blijven. Reken op één à twee weken, plus iemand die de documentatie beheert."},
+{n:"Problemen oplossen op de werkvloer",vec:[0,2,3,1,3],w:"Ingrijpen wanneer er iets misloopt. Een machine valt stil, een levering klopt niet, een order loopt vast.",fit:1,
+ u:"Niet te automatiseren.",s:[],pr:"",
+ g:"Leg oplossingen vast op het moment zelf, zodat de historiek later doorzoekbaar wordt. Dat is de enige voorbereiding die hier zin heeft."}]},
+
+{n:"Marketing of communicatie",tasks:[
+{n:"Teksten schrijven",vec:[2,1,0,3,1],bo:"Een gebouwde versie werkt met jullie stijlbeschrijving centraal beheerd, zodat iedereen dezelfde toon aanhoudt. Ze kan ook vanuit je briefing meteen de varianten per kanaal aanmaken.",w:"Alles wat je zelf uitschrijft. Nieuwsbrieven, blogartikels, berichten voor sociale media en advertentieteksten.",fit:3,
+ u:"Eerst je eigen stijl laten vastleggen, dan pas laten schrijven. Dat maakt het hele verschil.",
+ s:["Verzamel vijf teksten van jullie die goed zaten.","Laat de AI daar een stijlbeschrijving van maken (prompt hieronder).","Bewaar die beschrijving en plak ze voortaan boven elke schrijfopdracht."],
+ pr:"Dit zijn vijf teksten van ons. Analyseer de schrijfstijl en beschrijf:\n- Gemiddelde zinslengte en of we lange of korte zinnen gebruiken.\n- Toon: formeel, direct, warm, technisch?\n- Woorden en constructies die we opvallend vaak gebruiken.\n- Wat we duidelijk vermijden.\nSchrijf dit uit als een instructie die ik later kan hergebruiken.",
+ g:"Zodra meerdere mensen dit gebruiken, wil je de stijlinstructie op één plek beheren in plaats van in ieders eigen gesprek. Dat vraagt een gedeelde omgeving en iemand die ze bijhoudt."},
+{n:"Vertalen naar NL, FR of EN",vec:[3,1,0,2,1],bo:"Een gebouwde versie hangt aan je website of je productdatabase en vertaalt nieuwe teksten vanzelf, met jullie terminologielijst als vaste regel.",w:"Bestaande teksten omzetten naar een andere taal, met behoud van jullie eigen vakterminologie.",fit:3,
+ u:"Vertalen mét jullie eigen vakterminologie.",
+ s:["Maak een lijst van twintig termen die altijd hetzelfde vertaald moeten worden.","Plak die lijst boven elke vertaalopdracht.","Laat een moedertaalspreker de eerste tien nakijken."],
+ pr:"Vertaal onderstaande tekst naar het [Frans].\nGebruik deze terminologie strikt en consequent:\n[term NL] = [term FR]\n[term NL] = [term FR]\nRegels: behoud de toon van het origineel, vertaal geen product- of merknamen, en zet [TWIJFEL] bij zinnen die je op meerdere manieren kon lezen.\n\n[plak tekst]",
+ g:"Voor een hele catalogus of website wil je dit als vaste stroom, en dan heb je toegang nodig tot je productdatabase of je website en een koppeltool ertussen. Reken op één à twee weken."},
+{n:"Beeld en video bewerken",vec:[2,0,0,1,0],bo:"Een gebouwde versie maakt uit één bronbestand automatisch alle formaten aan die je nodig hebt per kanaal, en zet ze klaar in de juiste map.",w:"Foto's bijsnijden, de juiste formaten aanmaken per kanaal, en video's monteren of ondertitelen.",fit:2,
+ u:"Bruikbaar voor formaten en varianten, minder voor creatie.",
+ s:["Begin bij bestaand beeldmateriaal, niet bij generatie.","Let op rechten en op herkenbare personen.","Gebruik het voor bijsnijden en formaten, niet voor je hoofdbeeld."],
+ pr:"",g:"Hier valt weinig te bouwen. De winst zit in de juiste tools, niet in maatwerk, en je hebt vooral duidelijke afspraken nodig over beeldrechten."},
+{n:"Cijfers en resultaten opvolgen",vec:[2,3,3,1,0],bo:"Een gebouwde versie stuurt je elke week de drie cijfers die ertoe doen, met wat er bewoog en wat stabiel bleef. Geen dashboard dat je moet openen.",w:"Nagaan wat je campagnes en je website opleveren, en daarover rapporteren aan wie het wil weten.",fit:3,
+ u:"Een wekelijkse samenvatting in plaats van een dashboard dat niemand opent.",
+ s:["Exporteer je cijfers van de laatste acht weken.","Kies drie cijfers die er echt toe doen.","Vraag wat er beweegt, niet wat de stand is."],
+ pr:"Dit zijn onze cijfers van de laatste acht weken.\nGeef me in maximaal tien regels:\n1. Wat significant gestegen of gedaald is, met het cijfer erbij.\n2. Wat stabiel bleef en dus geen aandacht vraagt.\n3. Eén ding dat ik zou moeten uitzoeken.\nGeen marketingtaal, geen aanbevelingen die niet uit deze cijfers volgen.",
+ g:"Wekelijks vanzelf vraagt leestoegang tot je analytics of je CRM en een koppeltool die de cijfers ophaalt. Reken op ongeveer een week."},
+{n:"Productteksten en catalogus onderhouden",vec:[3,1,0,1,1],bo:"Een gebouwde versie draait rechtstreeks op je productdatabase en maakt bij elk nieuw product alle teksten aan, in alle lengtes en alle talen die je nodig hebt.",w:"Beschrijvingen en specificaties van je producten schrijven en actueel houden over al je kanalen heen.",fit:3,
+ u:"Van specificaties naar teksten, op schaal. Van alles in deze lijst schaalt dit het best.",
+ s:["Neem tien producten uit je catalogus met hun specificaties.","Vraag drie lengtes per product.","Controleer of er geen specificaties zijn verzonnen."],
+ pr:"Dit is een productfiche met specificaties. Schrijf drie versies:\n1. Webshop: maximaal 40 woorden, wervend maar feitelijk.\n2. Catalogus: maximaal 120 woorden.\n3. Vijf bullets met de belangrijkste kenmerken.\nGebruik enkel de specificaties uit de fiche. Verzin geen eigenschappen, maten of certificaten.\n\n[plak fiche]",
+ g:"Voor honderden producten laat je dit rechtstreeks op je productdatabase draaien. Dat vraagt lees- en schrijftoegang tot die database en een koppeltool. Reken op één à twee weken."},
+{n:"Klantfeedback doornemen",vec:[1,3,2,1,0],bo:"Een gebouwde versie verzamelt reviews, enquêtes en mails doorlopend op één plek en meldt het wanneer een thema opkomt dat er vorige maand nog niet was.",w:"Reviews, enquêtes en losse reacties lezen om te weten wat klanten echt van je vinden.",fit:3,
+ u:"Honderden reacties terugbrengen tot een handvol thema's.",
+ s:["Exporteer je reviews, enquêtes of feedbackmails naar één bestand.","Upload het.","Kijk vooral naar de thema's met weinig vermeldingen maar veel emotie."],
+ pr:"Dit zijn klantreacties. Groepeer ze in maximaal acht thema's.\nGeef per thema: het aantal vermeldingen, één representatief citaat, en of de toon overwegend positief of negatief is.\nSorteer op aantal.\nZet onderaan apart: opmerkingen die maar één keer voorkomen maar opvallend fel zijn.",
+ g:"Het valt hier mee, maar doorlopend en automatisch vraagt dat je feedback op één plek binnenkomt en dat er een koppeling is met die bron. Reken op enkele dagen."}]},
+
+{n:"HR of people",tasks:[
+{n:"Vacatureteksten opstellen",vec:[2,1,0,2,1],bo:"Een gebouwde versie vertrekt van je functieprofielen, maakt de versies per kanaal aan en publiceert ze in één beweging. Bij een nieuwe vacature hoef je enkel het profiel te kiezen.",w:"Een openstaande functie beschrijven en die tekst klaarmaken voor elk kanaal waar je publiceert.",fit:3,
+ u:"Een vacature schrijven die niet klinkt als elke andere vacature.",
+ s:["Neem het functieprofiel of de taakomschrijving erbij.","Gebruik de prompt hieronder, en let vooral op de verbodslijst erin.","Laat iemand die de job doet de eerste versie nalezen."],
+ pr:"Schrijf een vacaturetekst op basis van dit functieprofiel.\nStructuur: wat je doet, wat we vragen, wat we bieden, hoe solliciteren.\nVerboden: superlatieven, 'echte teamplayer', 'dynamische omgeving', 'jonge ploeg', 'gedreven'.\nWel: concrete taken, echte cijfers, en eerlijk zijn over wat de job zwaar maakt.\nNederlands, maximaal 400 woorden.\n\n[plak profiel]",
+ g:"Publiceren over meerdere kanalen tegelijk is een koppeling en geen AI-werk. Je hebt er wel toegang voor nodig tot elk van die kanalen. Vraag je jobsite of ze een API aanbieden."},
+{n:"Vragen over verlof en reglement",vec:[1,2,0,2,3],bo:"Een gebouwde versie staat open voor alle medewerkers en antwoordt met verwijzing naar het juiste artikel. HR krijgt enkel nog de vragen die er echt niet in staan.",w:"Medewerkers die komen vragen hoe iets zit. Verlofdagen, premies, opzegtermijnen of wat het arbeidsreglement precies zegt.",fit:3,
+ u:"Een vraagbaak op je arbeidsreglement. Meestal de grootste tijdwinst in HR.",
+ s:["Verzamel arbeidsreglement, cao-afspraken en interne regels in één PDF.","Upload en plak de instructie hieronder.","Test met tien vragen die je vaak krijgt."],
+ pr:"Dit zijn ons arbeidsreglement en onze interne afspraken. Beantwoord vragen enkel op basis van deze documenten.\nRegels:\n- Verwijs bij elk antwoord naar het artikel of de paragraaf.\n- Staat het er niet in, zeg dan: 'Dat staat niet in het reglement, neem contact op met HR.'\n- Verzin nooit een regel, termijn of bedrag.\nEerste vraag: [stel je vraag]",
+ g:"Dit toegankelijk maken voor alle medewerkers vraagt een gedeelde omgeving, toegangsrechten en een reglement dat actueel blijft. Reken op één à twee weken, plus iemand die het beheert."},
+{n:"Onboarding begeleiden",vec:[2,2,0,2,3],bo:"Een gebouwde versie begeleidt de nieuwe medewerker dag per dag door zijn eerste weken, beantwoordt zijn vragen en meldt aan jou wat nog niet ondertekend of geregeld is.",w:"Nieuwe medewerkers wegwijs maken in hun eerste weken, met alles wat ze moeten weten, krijgen en ondertekenen.",fit:3,
+ u:"Eén keer een schema bouwen, bij elke aanwerving hergebruiken.",
+ s:["Neem de functie waarvoor je het vaakst aanwerft.","Verzamel wat een nieuwe medewerker de eerste weken moet weten.","Laat er een dagschema van maken."],
+ pr:"Maak een onboardingschema voor de functie [functie], voor de eerste tien werkdagen.\nGeef per dag: wat de nieuwe medewerker doet, wie hij ontmoet en waarom, en wat hij gelezen of gezien moet hebben.\nHou rekening met: [wat bij jullie specifiek is].\nMaximaal één pagina.\n\nBasis:\n[plak wat je hebt]",
+ g:"Een assistent die de nieuwe medewerker zelf begeleidt, moet ergens staan waar die persoon bij kan en gevoed worden met jullie eigen materiaal. Reken op één à twee weken."},
+{n:"Opleidingen en certificaten opvolgen",vec:[3,1,1,1,0],bo:"Een gebouwde versie bewaakt alle vervaldata en verwittigt de betrokkene en zijn leidinggevende ruim op voorhand, zodat niemand nog zonder geldig attest staat.",w:"Bijhouden wie welke opleiding gevolgd heeft, en welke attesten of certificaten wanneer vervallen.",fit:3,
+ u:"Vervaldata zichtbaar maken voor ze verlopen.",
+ s:["Zet je huidige lijst in Excel, hoe rommelig ook.","Upload en vraag een geordend overzicht.","Zet er daarna een herinnering op in je agenda."],
+ pr:"Maak uit deze lijst een overzicht: naam medewerker, certificaat of opleiding, behaald op, vervalt op, dagen tot vervaldatum vanaf vandaag.\nSorteer op dringendheid.\nMarkeer alles wat binnen 90 dagen vervalt.\nZet [DATUM ONTBREEKT] waar geen vervaldatum vermeld is.",
+ g:"Het blijft beperkt, maar automatisch waarschuwen vraagt dat de lijst op één plek staat en een koppeling met je agenda of je mail. Reken op enkele dagen."},
+{n:"Kandidaten screenen en selecteren",vec:[0,2,3,1,0],w:"Cv's doornemen, kandidaten beoordelen en beslissen wie je uitnodigt voor een gesprek.",fit:1,
+ u:"Hier begin je niet aan. Systemen die meebeslissen over aanwerving of selectie vallen onder de hoogrisicoregels van de AI Act.",
+ s:[],pr:"",
+ g:"Beperk je tot de administratie rond de selectie, zoals planning en bevestigingsmails. Nooit tot de beoordeling zelf. Dit is geen kwestie van complexiteit maar van regelgeving."},
+{n:"Gesprekken voeren en bemiddelen",vec:[0,1,2,3,0],w:"Functionerings- en evaluatiegesprekken, maar evengoed conflicten tussen collega's uitpraten.",fit:1,
+ u:"Niet te automatiseren.",s:[],pr:"",
+ g:"Voorbereiding en verslaglegging kunnen wel. Vraag altijd toestemming voor je opneemt. Verder valt hier niets te bouwen."}]},
+
+{n:"Klantendienst of support",tasks:[
+{n:"Inkomende vragen sorteren",vec:[3,1,1,2,0],bo:"Een gebouwde versie wijst elke binnenkomende vraag toe aan de juiste persoon, met de klantgegevens en de orderstatus er al bij. Niemand moet nog eerst uitzoeken waarover het gaat.",w:"Van elke binnenkomende vraag bepalen waarover ze gaat, hoe dringend ze is en wie ze moet behandelen.",fit:3,
+ u:"Vragen categoriseren en prioriteren voor iemand ze leest.",
+ s:["Neem twintig vragen van deze week.","Plak ze genummerd in één blok.","Vergelijk de categorisering met je eigen inschatting."],
+ pr:"Categoriseer elke vraag hieronder in: bestelstatus, klacht, offerteaanvraag, technische vraag, of andere.\nGeef per vraag ook een urgentie (hoog, normaal, laag) met één regel uitleg.\nGeef het resultaat als tabel met het nummer van de vraag erbij.\n\n[plak genummerde vragen]",
+ g:"Automatisch toewijzen met klantcontext erbij vraagt toegang tot je gedeelde mailbox én je klantsysteem, en een koppeltool die de twee samenbrengt. Reken op één à twee weken."},
+{n:"Antwoorden schrijven",vec:[2,1,0,3,1],bo:"Een gebouwde versie zet het concept-antwoord meteen klaar in je gedeelde mailbox, in jullie eigen toon en met de juiste gegevens erin. Een medewerker leest en verstuurt.",w:"Het eigenlijke antwoord opstellen en versturen naar de klant.",fit:3,
+ u:"Concept-antwoorden in jullie eigen toon, die een mens nakijkt.",
+ s:["Verzamel twintig antwoorden die goed zaten.","Upload ze als voorbeeld.","Laat altijd een mens verzenden. Nooit automatisch."],
+ pr:"Dit zijn twintig antwoorden die wij eerder verstuurd hebben. Neem die toon en structuur over.\nSchrijf nu een antwoord op deze nieuwe vraag.\nRegels: verzin geen levertermijnen, prijzen of toezeggingen. Markeer met [AANVULLEN] wat ik zelf moet invullen.\n\nNieuwe vraag:\n[plak hier]",
+ g:"Concepten automatisch klaarzetten vraagt schrijftoegang tot je gedeelde mailbox en een plek waar je antwoordhistoriek staat. Reken op één à twee weken. Verzenden blijft mensenwerk."},
+{n:"Statusvragen beantwoorden",vec:[3,0,0,3,0],bo:"Een gebouwde versie antwoordt zelf vanuit je ordersysteem, of dat nu via mail, je website of een chat binnenkomt. Dat neemt vaak de helft van alle vragen weg bij je team.",w:"De vraag die altijd terugkomt. Waar blijft mijn bestelling, en wanneer komt de technieker langs.",fit:3,
+ u:"Dit is vaak de helft van al je vragen. Meet het dus eerst.",
+ s:["Tel een week lang hoeveel vragen puur over status gaan.","Kijk of het antwoord altijd uit hetzelfde systeem komt.","Boven de twintig per week is dit je beste kandidaat."],
+ pr:"",
+ g:"Automatisch antwoorden vraagt leestoegang tot je ordersysteem en een koppeling met het kanaal waar de vraag binnenkomt. Reken op één à twee weken."},
+{n:"Informatie opzoeken voor een antwoord",vec:[1,3,0,1,3],bo:"Een gebouwde versie is een kennisbank waar je hele team in gewone taal in zoekt, altijd gevoed met de actuele documenten. Niemand moet nog een collega storen.",w:"Uitzoeken hoe iets zit voor je kan antwoorden. Een specificatie, een garantietermijn of een eerder gemaakte afspraak.",fit:3,
+ u:"Een interne kennisbank waar je in gewone taal kan zoeken.",
+ s:["Verzamel productinfo, procedures en veelgestelde vragen in één bestand.","Gooi verouderde versies eruit.","Test met vragen waarvan je het antwoord kent."],
+ pr:"Dit is onze productinformatie en onze procedures. Beantwoord vragen enkel op basis hiervan.\nRegels:\n- Verwijs naar het document en de sectie.\n- Staat het er niet in, zeg dat expliciet.\n- Verzin nooit specificaties, termijnen of prijzen.\nEerste vraag: [stel je vraag]",
+ g:"Voor het hele team, altijd actueel, is dit één à twee weken."},
+{n:"Klachten registreren en opvolgen",vec:[2,2,2,1,1],bo:"Een gebouwde versie registreert klachten automatisch, volgt ze op tot ze gesloten zijn en meldt wanneer dezelfde oorzaak blijft terugkomen.",w:"Klachten noteren, ze opvolgen tot ze opgelost zijn, en nagaan of dezelfde klacht blijft terugkomen.",fit:3,
+ u:"Klachten groeperen naar oorzaak in plaats van naar symptoom.",
+ s:["Exporteer je klachten van de laatste zes maanden.","Upload ze.","Kijk vooral naar welke afdeling het vaakst terugkomt."],
+ pr:"Groepeer deze klachten naar onderliggende oorzaak, niet naar hoe de klant het verwoordde.\nGeef per oorzaak: aantal klachten, welke afdeling of stap in het proces erbij betrokken is, en één voorbeeldklacht.\nSorteer op aantal.\nZeg erbij welke oorzaken je met zekerheid kon toewijzen en welke je gokte.",
+ g:"Het valt hier mee, maar dit vraagt vooral dat klachten op één plek geregistreerd worden en een koppeling met die bron. Reken op enkele dagen."},
+{n:"Moeilijke klanten te woord staan",vec:[0,1,2,3,0],w:"Gesprekken met klanten die boos of ontevreden zijn, aan de telefoon of ter plaatse.",fit:1,
+ u:"Niet te automatiseren.",s:[],pr:"",
+ g:"Zorg dat alle context klaarstaat voor je belt. Snelheid van context is hier meer waard dan eender welk script. Verder valt hier niets te automatiseren."}]},
+
+{n:"Projecten of consultancy",tasks:[
+{n:"Statusrapportage maken",vec:[2,3,2,3,1],bo:"Een gebouwde versie haalt de stand rechtstreeks uit je projecttool en zet het rapport elke week klaar, met de risico's en de vertragingen eruit gelicht.",w:"Verslag uitbrengen over waar een project staat, aan je opdrachtgever of aan je eigen directie.",fit:3,
+ u:"Van projectexport naar een leesbaar rapport van één pagina.",
+ s:["Exporteer je takenlijst met status en deadlines.","Upload het.","Vraag om risico's, niet om een opsomming."],
+ pr:"Dit is de export van onze projecttool. Schrijf een statusrapport van maximaal één pagina:\n1. Wat is afgerond deze periode.\n2. Wat loopt volgens plan.\n3. Wat is vertraagd, met hoeveel en waarom als dat af te leiden is.\n4. De drie risico's die nu aandacht vragen.\nGeen opsomming van alle taken. Alleen wat een opdrachtgever moet weten.",
+ g:"Wekelijks vanzelf vraagt leestoegang tot je projecttool en een koppeltool die de export ophaalt. Reken op ongeveer een week."},
+{n:"Verslagen en notities uitwerken",vec:[3,1,1,3,1],bo:"Een gebouwde versie zet je overleg om in acties met eigenaars en zet die rechtstreeks in je projecttool. Ze bewaakt daarna ook wat blijft liggen.",w:"Wat er in een overleg gezegd is uitschrijven naar concrete afspraken en acties.",fit:3,
+ u:"Van opname naar acties met eigenaars.",
+ s:["Neem je volgende overleg op, met toestemming.","Zet om naar tekst.","Vraag de uitkomst, niet het verloop."],
+ pr:"Dit is het transcript van een projectoverleg. Geef me:\n1. Beslissingen, elk in één zin.\n2. Acties: wat, wie, tegen wanneer.\n3. Open punten zonder eigenaar.\n4. Wat er gezegd is over scope of budget, letterlijk.\nGeen weergave van de discussie.\n\n[plak transcript]",
+ g:"Acties rechtstreeks in je projecttool laten belanden vraagt schrijftoegang tot die tool en een koppeling met je opnametool. Reken op ongeveer een week."},
+{n:"Documenten en dossiers doorzoeken",vec:[1,3,1,0,3],bo:"Een gebouwde versie doorzoekt al je projecten tegelijk, met de juiste toegangsrechten per persoon. Wie iets zoekt, moet niet meer weten in welk project het zat.",w:"Terugvinden wat er eerder afgesproken of vastgelegd is in je projectdocumenten.",fit:3,
+ u:"Een vraagbaak op je eigen projectdocumentatie.",
+ s:["Verzamel de documenten van één lopend project.","Verwijder oude versies.","Test met vragen waarvan je het antwoord kent."],
+ pr:"Dit is de documentatie van project [naam]. Beantwoord vragen enkel op basis hiervan.\nRegels: verwijs naar document en pagina, zeg het expliciet als iets er niet in staat, en verzin nooit afspraken of bedragen.\nEerste vraag: [stel je vraag]",
+ g:"Over alle projecten heen en altijd actueel vraagt toegang tot je volledige documentopslag, toegangsrechten per project en iemand die opruimt. Reken op één à twee weken."},
+{n:"Planning en scope opvolgen",vec:[2,2,3,2,1],bo:"Een gebouwde versie bewaakt je planning doorlopend en meldt taken die uitlopen of die geen eigenaar hebben, voor de klant het merkt.",w:"Bewaken of het project op schema zit, en of er niet stilletjes werk bijkomt dat niemand betaalt.",fit:2,
+ u:"Werkt alleen als je projecttool effectief bijgehouden wordt.",
+ s:["Controleer eerst of de statussen in je tool kloppen met de werkelijkheid.","Zo niet, is dat je echte probleem.","Zo ja, laat afwijkingen signaleren."],
+ pr:"",
+ g:"Signalering vraagt leestoegang tot je projecttool en een koppeling met je mail. Reken op enkele dagen, maar enkel als je statussen kloppen met de werkelijkheid."},
+{n:"Voorstellen en offertes schrijven",vec:[2,3,1,2,2],bo:"Een gebouwde versie werkt met een bibliotheek van je beste stukken en stelt bij elke nieuwe aanvraag een eerste versie samen op basis van je gespreksnotities.",w:"Een nieuw project uitschrijven met de aanpak, de timing en de prijs erin.",fit:3,
+ u:"Een eerste versie op basis van voorstellen die je gewonnen hebt.",
+ s:["Neem twee gewonnen voorstellen en je gespreksnotities.","Upload alles samen.","Herschrijf zelf de inleiding, want een klant voelt dat."],
+ pr:"Bestand 1 en 2 zijn voorstellen die wij gewonnen hebben. Bestand 3 zijn mijn notities van het gesprek met [klant].\nSchrijf een eerste versie van een voorstel in dezelfde structuur en toon.\nGebruik enkel wat in mijn notities staat over hun situatie. Verzin geen referenties, cijfers of beloftes.\nLaat prijzen open als [PRIJS INVULLEN].",
+ g:"Een doorzoekbare bibliotheek van je beste voorstellen moet op een gedeelde plek staan, met toegangsrechten, en iemand moet ze aanvullen. Reken op één à twee weken."},
+{n:"Stakeholders managen",vec:[0,1,2,3,0],w:"De mensen rond het project op één lijn houden. De opdrachtgever, de gebruikers en je eigen team.",fit:1,
+ u:"Niet te automatiseren.",s:[],pr:"",
+ g:"Bereid per stakeholder voor wat hij wil horen en waarom. Verder valt hier niets te automatiseren."}]}];
+
+const CTX=[
+{k:"tools",baas:{n:"Hoe is het AI-gebruik bij jullie vandaag geregeld?",
+  sub:"Denk aan ChatGPT, Microsoft Copilot, Google Gemini of Claude.",
+  o:["We gebruiken niets, of ik weet niet wat er gebruikt wordt","Er is niets over afgesproken, iedereen doet maar","Mensen gebruiken gratis versies, wij betalen niets","We hebben betaalde bedrijfsaccounts met duidelijke afspraken"]},
+ n:"Welke AI-tools mag je van je werkgever gebruiken voor je werk?",
+ sub:"Denk aan ChatGPT, Microsoft Copilot, Google Gemini of Claude.",
+ o:["Geen enkele, of ik weet niet of het mag","Er is niets over afgesproken, iedereen doet maar","Gratis versies gebruiken we, betaalde niet","We hebben betaalde bedrijfsaccounts met duidelijke afspraken"]},
+{k:"data",n:"Waar staat het gr\u00f3\u00f3tste deel van de informatie die je voor je werk nodig hebt?",
+ sub:"Het is bij de meeste bedrijven een mengeling. Kies waar het zwaartepunt ligt.",
+ o:["Vooral in mailboxen en in de hoofden van collega's","Vooral in Excel-bestanden en gedeelde mappen","Vooral in systemen, maar niet altijd bijgewerkt","Vooral in systemen, en die kloppen"]},
+{k:"skill",n:"Hoe vaak gebruik je vandaag AI-tools voor je werk?",
+ sub:"",o:["Nooit","Al eens geprobeerd","Wekelijks","Zo goed als dagelijks"]},
+{k:"schaal",baas:{n:"Hoeveel mensen bij jullie doen dit soort werk ook?",
+  sub:"Dit bepaalt of een verbetering bij jou alleen blijft of meteen voor meerdere mensen telt.",
+  o:["Alleen ik","Nog twee of drie anderen","Een ploeg van vier tot tien","Meer dan tien"]},
+ n:"Hoeveel mensen bij jullie doen werk dat op het jouwe lijkt?",
+ sub:"Dit bepaalt of een verbetering bij jou alleen blijft of meteen voor meerdere mensen telt.",
+ o:["Alleen ik","Nog twee of drie anderen","Een ploeg van vier tot tien","Meer dan tien"]},
+{k:"steun",baas:{n:"Als jullie iets willen automatiseren dat meerdere systemen raakt, wie doet dat dan?",
+  sub:"Bijvoorbeeld gegevens uit je CRM automatisch in een rapport krijgen.",
+  o:["Niemand, dat hebben we niet in huis","Een externe IT-partij, op afroep","Iemand intern, maar die heeft weinig tijd","Ja, iemand die daar tijd voor heeft"]},
+ n:"Als je iets zou willen automatiseren dat meerdere systemen raakt, wie kan je dan helpen?",
+ sub:"Bijvoorbeeld gegevens uit je CRM automatisch in een rapport krijgen.",
+ o:["Niemand, ik sta er alleen voor","Een externe IT-partij, op afroep","Iemand intern, maar die heeft weinig tijd","Ja, iemand die goed bereikbaar is"]}];
+
+/* ====== SCAN 2 ====== */
+const Q2=[
+{k:"tijd",p:"Hoeveel tijd gaat hier per week naartoe, opgeteld over alle betrokken medewerkers?",
+ o:["Nauwelijks tijd","Enkele uren","Een halve dag of meer","Meerdere dagen"]},
+{k:"routine",p:"Verloopt dit werk elke keer hetzelfde, of telkens anders?",
+ o:["Telkens anders, het vraagt vakkennis en oordeel","Vaak anders, maar met een herkenbare rode draad","Grotendeels hetzelfde, met uitzonderingen","Bijna altijd volgens hetzelfde stramien"]},
+{k:"info",p:"Waar staat het gr\u00f3\u00f3tste deel van de informatie die voor dit werk nodig is?",
+ o:["Vooral in mailboxen en in de hoofden van mensen","Vooral in Excel-bestanden en mappen","Vooral in een systeem, maar niet altijd bijgewerkt","Vooral in een systeem, en die gegevens kloppen"]}];
+
+const DOMAINS=[
+{c:"A",n:"Zicht op cijfers en beslissingen",s:"Dit gaat over hoe snel je weet waar het bedrijf staat, zonder dat je het ergens moet gaan opvragen.",
+ a:[{n:"Wekelijkse briefing",d:"Cijfers uit boekhouding, verkoop en planning in één bericht, met wat afwijkt gemarkeerd.",need:"Leestoegang tot twee of drie systemen",w:"1 à 2 weken"},
+    {n:"Afwijkingssignaal",d:"Melding zodra marge, cash, voorraad of klantgedrag buiten de gebruikelijke bandbreedte valt.",need:"Twaalf maanden historiek",w:"1 à 2 weken"}],
+ test:{t:"Test het deze week zelf, in een halfuur",s:["Exporteer je cijfers van vorige maand uit je boekhoudpakket als CSV.","Upload dat in ChatGPT of Claude.","Vraag: 'Geef me de vijf grootste afwijkingen tegenover de maand ervoor, met per afwijking een mogelijke verklaring en één vraag die ik aan mijn team moet stellen.'"],
+  r:"Als het antwoord bruikbaar is, weet je dat de data er is en is bouwen zinvol. Als het onzin geeft, zit je probleem in je data en niet in AI."},
+ tips:["Bepaal welke vijf cijfers wekelijks zichtbaar moeten zijn.","Vraag je boekhoudpakket of het een API heeft, want dat bepaalt wat er haalbaar is.","Begin met één cijfer dat vandaag manueel wordt opgevraagd."],
+ clean:["Zorg dat facturatie en verkoop dezelfde klantcodes gebruiken. Zonder gedeelde sleutel valt geen overzicht te bouwen.","Leg vast wat omzet en marge precies betekenen bij jullie."]},
+{c:"B",n:"Opvolging en communicatie",s:"Dit gaat over de opvolging van mail en toezeggingen, en over alles wat anders blijft liggen.",
+ a:[{n:"Toezeggingenregister",d:"Haalt uit mail en vergaderingen wat beloofd is en herinnert eraan voor de deadline.",need:"Mailbox en agenda",w:"1 à 2 weken"},
+    {n:"Klantcontext bij inkomende mail",d:"Openstaande facturen, orderstatus en historiek staan meteen bij de vraag.",need:"Koppeling met verkoop en facturatie",w:"1 à 2 weken"}],
+ test:{t:"Test het deze week zelf, in twintig minuten",s:["Kopieer je verzonden mails van de afgelopen twee weken in één blok.","Plak ze in je AI-tool.","Vraag: 'Haal hieruit alles wat ik heb toegezegd. Geef een tabel met wat, aan wie en tegen wanneer, gesorteerd op deadline.'"],
+  r:"De lijst die eruit komt, is meestal langer dan verwacht. Dat aantal is meteen je businesscase."},
+ tips:["Zet één vaste plek voor toezeggingen. Wat nergens staat, valt niet op te volgen.","Laat nooit automatisch mail verplaatsen of archiveren.","Log één week alle toezeggingen om het volume te zien."],
+ clean:["Stap over naar gedeelde mailboxen voor wat het bedrijf aangaat, niet persoonlijke adressen."]},
+{c:"C",n:"Vergaderingen en agenda",s:"Dit gaat over het werk rond overleg. De voorbereiding, de genomen beslissingen en de opvolging achteraf.",
+ a:[{n:"Meetingregie",d:"Voorbereiding vooraf, besluitenlijst achteraf, bewaking van acties die niet gebeuren.",need:"Agenda en een opnametool",w:"Enkele dagen"},
+    {n:"Weekvoorbereiding",d:"Je agenda naast wat deze week vervalt of dreigt vast te lopen.",need:"Agenda plus één operationeel systeem",w:"1 week"}],
+ test:{t:"Test het bij je volgende overleg",s:["Zeg vooraf dat je opneemt en neem je eerstvolgende intern overleg op.","Laat er een transcript van maken.","Vraag: 'Geef me de genomen beslissingen, de acties met wie en tegen wanneer, en de open punten zonder eigenaar. Geen samenvatting van de discussie.'"],
+  r:"Vergelijk het resultaat met wat er anders was blijven hangen. Dat verschil is meestal groot."},
+ tips:["Elke vergadering eindigt met wie doet wat tegen wanneer. Zonder die gewoonte helpt geen enkele tool.","Test eerst op intern overleg, nooit meteen bij een klant.","Check of je Microsoft- of Google-licentie dit al bevat."],
+ clean:["Spreek af wie opneemt en waar opnames blijven, voor je begint."]},
+{c:"D",n:"Verkoop en offertes",s:"Dit gaat over alles tussen de eerste klantvraag en een getekende offerte.",
+ a:[{n:"Offertemotor",d:"Aanvraag omgezet naar concept-offerte met de juiste prijzen en klanthistoriek.",need:"Prijslijst op één plek en tien recente offertes",w:"1 à 2 weken"},
+    {n:"Offertebewaking",d:"Signaleert offertes die langer openstaan dan gebruikelijk, voor ze koud worden.",need:"Verkoopsysteem met datumvelden",w:"Enkele dagen"}],
+ test:{t:"Test het deze week zelf, in een halfuur",s:["Zoek drie offertes op die je gewonnen hebt.","Upload ze samen in één gesprek.","Vraag: 'Schrijf op dezelfde structuur en toon een offerte voor [klant, wat ze vragen]. Laat alle bedragen leeg als PRIJS INVULLEN en verzin geen specificaties.'"],
+  r:"Als de eerste versie voor tachtig procent bruikbaar is, is een offertemotor de investering waard. Meet dan hoelang een offerte vandaag duurt."},
+ tips:["Meet hoelang een offerte vandaag duurt, van aanvraag tot verzending. Dat getal is later je bewijs.","Laat een offerte nooit automatisch buitengaan.","Verzamel je tien laatste offertes op één plek."],
+ clean:["Breng prijzen en kortingsregels naar één bron. Anders produceert elke motor foute offertes met veel zelfvertrouwen."]},
+{c:"E",n:"Klantopvolging en service",s:"Dit gaat over vragen, klachten en al het contact met de klant nadat er verkocht is.",
+ a:[{n:"Mailroutering met context",d:"De vraag komt bij de juiste persoon, met klantgegevens en orderstatus erbij.",need:"Gedeelde mailbox en één klantsysteem",w:"1 à 2 weken"},
+    {n:"Antwoordvoorstel",d:"Concept-antwoord dat een medewerker nakijkt en verstuurt.",need:"Historiek van beantwoorde vragen",w:"1 à 2 weken"}],
+ test:{t:"Test het deze week zelf, in twintig minuten",s:["Neem twintig klantvragen van deze week en nummer ze.","Plak ze in je AI-tool.","Vraag: 'Categoriseer elke vraag in bestelstatus, klacht, offerteaanvraag, technische vraag of andere. Geef per vraag ook een urgentie met één regel uitleg.'"],
+  r:"Kijk hoeveel procent puur statusvragen zijn. Boven de dertig procent heb je een duidelijke kandidaat."},
+ tips:["Begin bij ondersteuning van je eigen mensen, niet bij een chatbot naar de klant.","Bewaar je laatste tweehonderd antwoorden, want dat is je bouwmateriaal.","Gebruik één gedeelde mailbox."],
+ clean:["Registreer klachten op één plek, ook al is het ruw. Wat nergens staat, valt niet te analyseren."]},
+{c:"F",n:"Facturatie en cash",s:"Dit gaat over inkomende en uitgaande facturen, en over de opvolging van wat er nog openstaat.",
+ a:[{n:"Inkomende factuurverwerking",d:"Herkennen, coderen, matchen met de bestelbon en klaarzetten ter goedkeuring.",need:"Scanstroom en boekhoudpakket met API",w:"1 à 2 weken"},
+    {n:"Debiteurenopvolging",d:"Herinneringen met een toon die past bij het betaalgedrag van die klant, met escalatie.",need:"Boekhoudpakket en betaalhistoriek",w:"1 à 2 weken"}],
+ test:{t:"Test het deze week zelf, in twintig minuten",s:["Neem vijf inkomende facturen als PDF.","Upload ze samen.","Vraag: 'Haal uit elke factuur leverancier, factuurnummer, datum, vervaldatum, bedrag excl. btw, btw en totaal. Geef één tabel en zet ONLEESBAAR waar je iets niet zeker weet.'"],
+  r:"Tel hoeveel velden fout zijn. Onder de vijf procent fouten is automatiseren realistisch, daarboven eerst je scanproces aanpakken."},
+ tips:["Vraag je boekhoudpakket naar API-toegang, want dat antwoord bepaalt wat er haalbaar is.","Zet betaaltermijnen en escalatiemomenten op papier voor je automatiseert.","Begin bij inkomende facturen: minder risico dan wat naar buiten gaat."],
+ clean:["Zorg dat bestelbonnen en facturen aan elkaar te koppelen zijn. Zonder die link blijft matchen handwerk."]},
+{c:"G",n:"Operations en planning",s:"Dit gaat over de weg van order tot uitvoering, met de planning en de registratie erbij.",
+ a:[{n:"Orderintake",d:"Orders uit mail of pdf naar systeeminvoer, met controle op afwijkingen.",need:"Ordersysteem met API",w:"1 à 2 weken"},
+    {n:"Verslag naar registratie",d:"Werkbon in gewone taal wordt gestructureerde registratie.",need:"Mobiele invoer",w:"Enkele dagen"}],
+ test:{t:"Test het deze week zelf, in een halfuur",s:["Neem vijf recente bestelmails of bestelbonnen.","Plak of upload ze.","Vraag: 'Haal per bestelling klant, referentie, gewenste leverdatum, leveradres en alle artikelen met aantal. Geef één tabel, zet ONTBREEKT waar iets niet vermeld is, en verzin geen artikelnummers.'"],
+  r:"Klopt het voor negentig procent, dan is orderintake je beste kandidaat. Volg daarnaast één order van begin tot eind en meet apart hoeveel daarvan wachttijd is."},
+ tips:["Volg één order van begin tot eind en meet doorlooptijd en wachttijd apart. Meestal is tachtig procent wachten.","Is het wachten, dan is het een proceskeuze en geen AI-probleem. Dat is goedkoper op te lossen.","Begin bij registratie aan de bron."],
+ clean:["Bouw eerst betrouwbare registratie. Planning en voorspelling vragen jaren propere historiek."]},
+{c:"H",n:"Documenten en kennis",s:"Dit gaat over procedures en specificaties, en over hoe snel je mensen ze terugvinden.",
+ a:[{n:"Interne vraagbaak",d:"Medewerkers vinden antwoorden in jullie eigen procedures en specificaties.",need:"Documenten op één plek en actueel",w:"1 à 2 weken"},
+    {n:"Vervaldatabewaking",d:"Bewaakt contracten, indexeringen, opzegtermijnen en certificaten.",need:"Contracten op één plek",w:"Enkele dagen"}],
+ test:{t:"Test het deze week zelf, in een halfuur",s:["Kies één onderwerp en verzamel de actuele documenten in één PDF. Gooi oude versies eruit.","Upload het.","Plak: 'Beantwoord vragen enkel op basis van deze documenten. Verwijs naar de sectie. Staat het er niet in, zeg dat. Verzin nooit een regel of bedrag.' Stel dan vijf vragen waarvan je het antwoord kent."],
+  r:"Geeft hij op alle vijf het juiste antwoord met de juiste verwijzing, dan is je documentatie goed genoeg. Zo niet, is opruimen je eerste werk."},
+ tips:["Ruim eerst op. Een vraagbaak op verouderde documenten geeft foute antwoorden met veel overtuiging.","Maak één map volledig correct in plaats van alles half.","Noteer een week welke vragen mensen aan elkaar stellen. Dat is je inhoudsopgave."],
+ clean:["Bepaal per onderwerp welke versie geldt en verwijder de rest. Dubbele versies zijn de grootste foutenbron."]}];
+
+const ORG=[
+{k:"expert",n:"Afhankelijkheid van personen",
+ p:"Hoeveel werk bij jullie hangt af van één persoon die het als enige goed kent?",
+ o:["Nauwelijks, alles is overdraagbaar","Op een paar plekken","Op verschillende plekken","Veel, het is een bekend risico"],
+ low:"Jullie kennis zit grotendeels in systemen en procedures. Dat is zeldzaam en het maakt bouwen makkelijker.",
+ mid:"Er zijn een paar plekken waar het werk aan één persoon hangt. Dat is beheersbaar, maar begin ermee voor die persoon vertrekt of met pensioen gaat.",
+ high:"Dit is je grootste stille risico en meteen je beste kans. Wat in één hoofd zit, kan je ontsluiten in een vraagbaak zodat de rest van het team er ook bij kan. Dat is bovendien makkelijker te verkopen intern dan tijdswinst, want iedereen voelt het risico aan."},
+{k:"traag",n:"Snelheid van beslissen",
+ p:"Hoe vaak ligt werk bij jullie stil omdat er op een beslissing of een goedkeuring gewacht wordt?",
+ o:["Zelden","Af en toe","Regelmatig","Voortdurend"],
+ low:"Jullie beslissen vlot. De winst zit bij jullie dus in het werk zelf en niet in de doorlooptijd.",
+ mid:"Er gaat tijd verloren aan wachten. Kijk eerst of dat komt door ontbrekende informatie of door ontbrekende afspraken.",
+ high:"Hier zit waarschijnlijk meer winst dan in eender welke tijdsbesparing. Als werk stilligt omdat iemand op cijfers of op een goedkeuring wacht, dan verkort je de doorlooptijd door de beslisser sneller het juiste beeld te geven. Let op: als het wachten aan een afspraak ligt en niet aan informatie, dan is dat een proceskeuze en geen technisch probleem."},
+{k:"risico",n:"Gevolg van fouten",
+ p:"Als er in jullie kernprocessen iets fout gaat, wat is doorgaans het gevolg?",
+ o:["Hinder, snel recht te zetten","Kosten of herwerk","Een ontevreden klant of een misgelopen order","Veiligheid, aansprakelijkheid of een verloren klant"],
+ low:"Het foutrisico is beperkt. Je kan sneller doorgaan en meer stappen zonder tussenkomst laten lopen.",
+ mid:"Bouw een controlepunt in bij elke stap die naar buiten gaat. Binnen je eigen muren kan het losser.",
+ high:"Bij dit risiconiveau laat je niets automatisch vertrekken. Alles wat een klant, een leverancier of de veiligheid raakt, gaat langs een mens die aftekent. Bouw dat vanaf dag één in en niet achteraf, want een fout hier kost je het vertrouwen in het hele traject."}];
+
+/* ====== SCAN 3 ====== */
+const PILLARS=[
+{n:"Afspraken en beleid",qs:[
+ {p:"Is er in jullie bedrijf afgesproken welke AI-tools medewerkers mogen gebruiken?",o:["Nee, daar is niets over gezegd","Mondeling, informeel","Het staat op papier, maar weinig mensen kennen het","Het staat op papier en iedereen kent het"]},
+ {p:"Is vastgelegd welke bedrijfsgegevens wel en niet in externe AI-tools mogen?",o:["Nee","Impliciet, iedereen voelt wel aan wat kan","Ja, maar het is nooit gecommuniceerd","Ja, en iedereen weet het"]}],
+ low:"Zonder afspraken gebruikt iedereen wat hij wil, met bedrijfsdata. Dit is je eerste en goedkoopste stap.",
+ high:"De afspraken staan. Dat maakt alles wat volgt verantwoordbaar."},
+{n:"Vaardigheden en geletterdheid",qs:[
+ {p:"Hoeveel van je medewerkers kunnen AI vandaag zinvol inzetten in hun eigen werk?",o:["Vrijwel niemand","Een paar enthousiastelingen","Een deel van het team","De meesten"]},
+ {p:"Is er opleiding gegeven over AI, afgestemd op wat mensen in hun functie effectief doen?",o:["Nee, geen enkele","Eén algemene sessie voor iedereen","Ja, voor een deel van het team","Ja, structureel en per functie"]}],
+ low:"De AI Act verplicht organisaties om te zorgen voor voldoende AI-geletterdheid bij iedereen die met AI werkt. Dat geldt sinds februari 2025 voor alle AI-systemen, ongeacht risiconiveau.",
+ high:"Er is genoeg basis om zaken over te dragen in plaats van uit te besteden."},
+{n:"Eigenaarschap en beheer",qs:[
+ {p:"Is er iemand aangeduid die verantwoordelijk is voor de AI-toepassingen die bij jullie draaien?",o:["Nee, niemand","Iemand doet het erbij, zonder mandaat","Iemand met wat tijd ervoor vrijgemaakt","Het staat expliciet in iemands functie"]},
+ {p:"Wat gebeurt er als zo'n toepassing stukgaat of een leverancier iets wijzigt?",o:["Dan valt het gewoon stil","Iemand probeert het op te lossen als hij tijd heeft","Er is een afspraak met een externe partij","Beheer en onderhoud zijn geregeld"]}],
+ low:"Dit is de belangrijkste reden dat projecten stilvallen. Zonder eigenaar staat wat je bouwt binnen zes maanden stil, en dan leert de organisatie dat AI niet werkt.",
+ high:"Er is iemand om aan over te dragen, en beheer is geregeld. Dat verdubbelt de levensduur van alles wat je bouwt."},
+{n:"Data en systemen",qs:[
+ {p:"Wisselen jullie systemen automatisch gegevens uit, of gebeurt dat met de hand?",o:["Ze staan volledig los van elkaar","Gegevens worden overgetypt","Sommige systemen zijn gekoppeld","De meeste systemen zijn gekoppeld"]},
+ {p:"Hoe betrouwbaar zijn de gegevens in die systemen?",o:["Vaak verouderd of fout","Wisselend, je moet altijd nakijken","Meestal juist","Betrouwbaar, we werken erop"]}],
+ low:"Veel van wat je wil, vraagt eerst een koppeling of opschoning. Dat is vaak geen AI-werk, maar wel de voorwaarde.",
+ high:"De data is bereikbaar en bruikbaar. Dat maakt bouwen aanzienlijk sneller."},
+{n:"Wat er vandaag gebeurt",qs:[
+ {p:"Weet je welke AI-tools je medewerkers vandaag effectief gebruiken?",o:["Geen idee","Ik heb vermoedens","Grotendeels wel","Volledig in kaart"]},
+ {p:"Is er eerder iets met AI geprobeerd dat is stilgevallen?",o:["Ja, meerdere keren","Ja, één keer","Nee, we hebben nog niets geprobeerd","Nee, wat we opzetten draait nog"]}],
+ low:"Er gebeurt van alles buiten je zicht. Een praktijkscan is hier de logische eerste stap, en meestal een verrassing.",
+ high:"Je hebt zicht op wat er speelt. Dat is zeldzamer dan je denkt."}];
+
+const LEVELS=[
+{max:.25,n:"Ongeregeld",d:"AI gebeurt bij jullie buiten elk kader om. Elke euro die je vandaag in bouwen steekt, lekt weg. Begin bij afspraken en zicht, niet bij toepassingen."},
+{max:.5,n:"Op gang",d:"Er beweegt iets, maar het hangt aan individuen. Wat één iemand uitvindt, wordt nog niet van het bedrijf. Je grootste winst zit in overdracht en eigenaarschap, niet in nieuwe tools."},
+{max:.75,n:"Verankerd",d:"De basis staat en er is genoeg structuur om echt te bouwen. Vanaf hier loont het om een volledig proces aan te pakken in plaats van losse taken."},
+{max:1.01,n:"Ingebed",d:"Kader, kennis en beheer staan. De vraag is niet meer of, maar welk proces als volgende."}];
+
+const KADER_ACTIES={
+"Afspraken en beleid":[
+ {t:"Deze week: breng in kaart wat er gebruikt wordt",d:"Vraag in je volgende teamoverleg gewoon rond wie welke AI-tool gebruikt en waarvoor. Niet als controle, als inventaris. Je krijgt bijna altijd een langer lijstje dan verwacht."},
+ {t:"Daarna: één A4 met afspraken",d:"Welke tools mogen, welke gegevens nooit naar buiten, en wie beslist bij twijfel. Eén pagina die mensen effectief lezen, is meer waard dan een beleid van twintig."}],
+"Vaardigheden en geletterdheid":[
+ {t:"Deze week: vraag per functie één taak",d:"Laat elke medewerker één taak noemen die veel tijd kost en telkens hetzelfde verloopt. Dat is meteen je opleidingsprogramma, en het is concreter dan een algemene sessie."},
+ {t:"Daarna: opleiding per rol, niet voor iedereen tegelijk",d:"Een algemene sessie beklijft niet. Twee uur met de mensen van finance over hun eigen facturen wel. Dit dekt bovendien je verplichting rond AI-geletterdheid."}],
+"Eigenaarschap en beheer":[
+ {t:"Deze week: wijs iemand aan",d:"Iemand die het draagt, met tijd ervoor in zijn agenda. Doe dit vóór je iets bouwt, niet erna. Zonder deze stap is de rest weggegooid geld."},
+ {t:"Daarna: leg vast wat er gebeurt als iets stukgaat",d:"Wie merkt het, wie lost het op, en binnen welke termijn. Ook als het antwoord 'we bellen die externe partij' is."}],
+"Data en systemen":[
+ {t:"Deze week: bel je twee belangrijkste leveranciers",d:"Vraag of hun pakket een API heeft en wat die kost. Dat ene antwoord bepaalt de helft van wat er bij jullie mogelijk is, en het wordt zelden gevraagd."},
+ {t:"Daarna: kies één koppeling",d:"Waar wordt het vaakst overgetypt? Los dat op met een koppeling. Dat is meestal geen AI en het is goedkoper dan je denkt."}],
+"Wat er vandaag gebeurt":[
+ {t:"Deze week: praktijkscan",d:"Wie gebruikt wat, met welke gegevens, betaald door wie. Je vindt bijna altijd ongereguleerd gebruik, en soms abonnementen waar je niet van wist."},
+ {t:"Daarna: haal op wat er is misgelopen",d:"Als er eerder iets stilgevallen is, zoek uit waarom. In negen op de tien gevallen was er geen eigenaar, niet omdat de techniek faalde."}]};
+
+/* ====== CONFIGURATIE ======
+   Vul dit in zodra je Supabase-project bestaat (zie supabase/schema.sql in
+   de repository). Project-instellingen > API > "Project URL" en "anon
+   public" key. Die sleutel mag in de broncode staan: het is de publieke,
+   alleen-toevoegen sleutel, de RLS-policies in schema.sql laten enkel
+   "insert" toe, nooit lezen. */
+const SUPABASE_URL="https://wnbeelsruqdlowllvezy.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_i8k9Hbq438zUUcUNOEWs8g_ydWl8tt2";
+const OWNER="Mathias Daeseleire";
+
+/* sessie leeft enkel in het geheugen van deze pagina-load, geen cookie nodig */
+const SESSIE=Date.now().toString(36)+Math.random().toString(36).slice(2,10);
+
+/* UTM-bron of verwijzende site, ook enkel in het geheugen */
+const BRON=(function(){
+ try{
+  const p=new URLSearchParams(location.search);
+  const u=['utm_source','utm_medium','utm_campaign'].map(k=>p.get(k)).filter(Boolean).join('/');
+  if(u)return u;
+  if(document.referrer){try{return new URL(document.referrer).hostname;}catch(e){return'';}}
+ }catch(e){}
+ return'';})();
+
+function supaInsert(table,row){
+ if(!SUPABASE_URL||!SUPABASE_ANON_KEY)return Promise.resolve();
+ return fetch(SUPABASE_URL+'/rest/v1/'+table,{method:'POST',
+  headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,
+   'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Prefer':'return=minimal'},
+  body:JSON.stringify(row)}).catch(()=>{});}
+
+/* trechtermeting: link geopend, eerste vraag, laatste vraag, e-mail, download */
+let eersteVraagGetrackt=false;
+function track(stap,scan){supaInsert('events',{sessie:SESSIE,scan:scan||pending||null,stap:stap});}
+
+
+/* ====== LINE-ART ICONEN ====== */
+const I={
+user:'<path d="M12 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7z"/><path d="M4.5 20c0-3.6 3.4-6 7.5-6s7.5 2.4 7.5 6"/>',
+building:'<path d="M4 20V6a2 2 0 012-2h7a2 2 0 012 2v14"/><path d="M15 10h3a2 2 0 012 2v8"/><path d="M3 20h18M8 8h3M8 12h3M8 16h3"/>',
+shield:'<path d="M12 3.5l7 2.8V12c0 4.2-2.9 7.4-7 8.5-4.1-1.1-7-4.3-7-8.5V6.3z"/><path d="M9.3 12.2l1.9 1.9 3.6-3.8"/>',
+arrowR:'<path d="M4.5 12h14"/><path d="M13 6.5l6 5.5-6 5.5"/>',
+arrowL:'<path d="M19.5 12h-14"/><path d="M11 17.5L5 12l6-5.5"/>',
+download:'<path d="M12 4v11"/><path d="M8 11.5l4 4 4-4"/><path d="M4.5 19.5h15"/>',
+printer:'<path d="M7 9V4.5h10V9"/><path d="M7 17.5H5a1 1 0 01-1-1V11a1 1 0 011-1h14a1 1 0 011 1v5.5a1 1 0 01-1 1h-2"/><path d="M7 14.5h10v5H7z"/>',
+home:'<path d="M4 11l8-6.5 8 6.5"/><path d="M6.5 9.8V19.5h11V9.8"/>',
+copy:'<path d="M9 9h9.5v9.5H9z"/><path d="M15 9V5.5H5.5V15H9"/>',
+list:'<path d="M9 7h11M9 12h11M9 17h11"/><path d="M4.5 7h.01M4.5 12h.01M4.5 17h.01"/>',
+layers:'<path d="M12 3.5l8.5 4.5L12 12.5 3.5 8z"/><path d="M3.5 13L12 17.5 20.5 13"/>',
+target:'<path d="M12 20.5a8.5 8.5 0 100-17 8.5 8.5 0 000 17z"/><path d="M12 16a4 4 0 100-8 4 4 0 000 8z"/><path d="M12 13a1 1 0 100-2 1 1 0 000 2z"/>',
+gauge:'<path d="M4 17.5a8.5 8.5 0 1116 0"/><path d="M12 14l3.8-3.8"/>',
+grid:'<path d="M4.5 4.5h6v6h-6zM13.5 4.5h6v6h-6zM4.5 13.5h6v6h-6zM13.5 13.5h6v6h-6z"/>',
+flag:'<path d="M6 21V4.5"/><path d="M6 5h10.5l-1.6 3.5 1.6 3.5H6"/>',
+bolt:'<path d="M13.5 3.5L6 13.5h5l-.5 7 7.5-10h-5z"/>',
+clock:'<path d="M12 20.5a8.5 8.5 0 100-17 8.5 8.5 0 000 17z"/><path d="M12 7.5V12l3 1.8"/>',
+alert:'<path d="M12 4.5l8 14H4z"/><path d="M12 10v4M12 16.5h.01"/>',
+sparkle:'<path d="M12 4l1.8 4.7L18.5 10.5l-4.7 1.8L12 17l-1.8-4.7L5.5 10.5l4.7-1.8z"/><path d="M18.5 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/>',
+check:'<path d="M20 6.5L9.5 17 4.5 12"/>'};
+const svg=(k,cls)=>'<svg class="'+(cls||'ico')+'" viewBox="0 0 24 24">'+I[k]+'</svg>';
+const sq=(k,extra)=>'<span class="sq '+(extra||'')+'"><svg viewBox="0 0 24 24">'+I[k]+'</svg></span>';
+const lbl=(k,t)=>'<p class="lbl">'+svg(k)+t+'</p>';
+
+
+/* ====== RADAR ====== */
+const AXES=[["Automatiseerbaar",0],["Kenniswerk",1],["Beslissingen",2],["Communicatie",3],["Expertise delen",4]];
+function radarData(){
+ const T=role.tasks.map((t,i)=>({v:t.vec||[0,0,0,0,0],t:A['P_t'+i]}));
+ const ax=AXES.map(([,j])=>{
+  const num=T.reduce((s,x)=>s+x.t*x.v[j],0), den=3*T.reduce((s,x)=>s+x.v[j],0);
+  return den?num/den:0;});
+ ax.push((A.P_data*.6+A.P_steun*.4)/3);
+ return ax;}
+const RLBL=["Automatiseerbaar","Kenniswerk","Beslissingen","Communicatie","Expertise delen","Datagereedheid"];
+
+function radarSVG(vals){
+ const W=660,H=430,cx=W/2,cy=H/2+6,R=138,n=6;
+ const pt=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/n;
+  return[cx+Math.cos(a)*r*R,cy+Math.sin(a)*r*R];};
+ let s='';
+ for(let k=1;k<=4;k++){
+  const p=[...Array(n)].map((_,i)=>pt(i,k/4).join(',')).join(' ');
+  s+='<polygon points="'+p+'" fill="none" stroke="#E3E8EE" stroke-width="1"/>';}
+ for(let i=0;i<n;i++){const[x,y]=pt(i,1);
+  s+='<line x1="'+cx+'" y1="'+cy+'" x2="'+x+'" y2="'+y+'" stroke="#E3E8EE"/>';}
+ const poly=vals.map((v,i)=>pt(i,Math.max(.04,v)).join(',')).join(' ');
+ s+='<polygon points="'+poly+'" fill="rgba(79,70,229,.14)" stroke="#4F46E5" stroke-width="2" stroke-linejoin="round"/>';
+ vals.forEach((v,i)=>{const[x,y]=pt(i,Math.max(.04,v));
+  s+='<circle cx="'+x+'" cy="'+y+'" r="4.5" fill="#fff" stroke="#4F46E5" stroke-width="2"/>';});
+ RLBL.forEach((l,i)=>{const[x,y]=pt(i,1.26);
+  const anc=Math.abs(x-cx)<6?'middle':(x>cx?'start':'end');
+  s+='<text x="'+x+'" y="'+(y+4)+'" font-family="Inter,sans-serif" font-size="12.5" font-weight="600" '+
+   'fill="#425466" text-anchor="'+anc+'">'+l+'</text>';
+  s+='<text x="'+x+'" y="'+(y+20)+'" font-family="Inter,sans-serif" font-size="11.5" '+
+   'fill="#8A94A6" text-anchor="'+anc+'">'+Math.round(vals[i]*100)+'</text>';});
+ return s;}
+
+function radarTekst(v){
+ const m=RLBL.map((l,i)=>({l,v:v[i]})).slice(0,5).sort((x,y)=>y.v-x.v);
+ const top=m[0],tweede=m[1],data=v[5];
+ const D={
+ "Automatiseerbaar":"Je zwaartepunt ligt bij werk dat telkens hetzelfde verloopt. Dat is het makkelijkste om weg te nemen, want de vorm ligt vast. Kijk hier eerst naar een koppeling voor je aan AI denkt, want vaste stappen tussen twee systemen los je goedkoper op met een koppeling.",
+ "Kenniswerk":"Je zwaartepunt ligt bij zoeken, lezen en samenvatten. Dat is precies waar taalmodellen sterk in zijn, ook als elke zaak anders is. Verwacht hier geen volledige automatisering maar wel dat je het werk in de helft van de tijd doet, met jezelf als eindredacteur.",
+ "Beslissingen":"Je zwaartepunt ligt bij beslissen op basis van informatie. Hier zit je winst niet in bespaarde uren maar in snelheid en in de kwaliteit van je beeld. Laat AI je voorbereiden en tegenspreken, nooit beslissen.",
+ "Communicatie":"Je zwaartepunt ligt bij schrijven, overleggen en afstemmen. Dat is het snelst voelbaar en het laagst in risico, op voorwaarde dat je zelf verstuurt. Begin hier als je nog geen ervaring hebt.",
+ "Expertise delen":"Je zwaartepunt ligt bij kennis die in hoofden zit. Dat is de minst bekende kans en vaak de waardevolste, want je maakt je bedrijf minder afhankelijk van één persoon. Begin met opschrijven wat er nu nergens staat."};
+ let t=D[top.l]+" Daarnaast weegt "+tweede.l.toLowerCase()+" mee.";
+ t+=data<.4?" Je datagereedheid is laag, dus hou het voorlopig bij werk waarbij jij de informatie zelf aanlevert."
+   :data<.7?" Je datagereedheid is redelijk. Taken waarbij informatie uit één systeem moet komen, zijn haalbaar."
+   :" Je datagereedheid is goed, dus ook taken die meerdere systemen kruisen liggen binnen bereik.";
+ return t;}
+
+const SCHAAL=["Deze winst blijft bij jou alleen. Dat is prima om te starten, maar hou er rekening mee dat het bedrijf er nog niets van merkt.",
+ "Wat voor jou werkt, telt meteen voor drie mensen. Schrijf daarom op wat je doet, zodat de anderen het kunnen overnemen.",
+ "Met een ploeg van deze grootte vermenigvuldigt elke verbetering zich vier tot tien keer. Vanaf hier loont het om het niet zelf te blijven doen maar te laten vastleggen.",
+ "Bij meer dan tien mensen is dit geen persoonlijke verbetering meer maar een bedrijfsbeslissing. Eén uur per persoon per week is hier al een halve voltijdse."];
+const ROUTE=v=>v[0]>=3?["Route: automatiseren","Dit verloopt telkens hetzelfde, dus hier hoort uiteindelijk een koppeling of een vaste stroom, niet een gesprek met een AI-tool."]
+ :v[1]>=3?["Route: assistent, jij beslist","Elke zaak is hier anders, dus verwacht geen knop die het overneemt. Het model levert een eerste versie en jij blijft eindredacteur."]
+ :["Route: ondersteunen","Dit blijft grotendeels jouw werk. AI neemt hier de aanloop weg, niet de taak zelf."];
+
+/* ====== ENGINE ====== */
+const A={};let role=null,page=0,pending=null;
+const done={persoon:false,bedrijf:false,kader:false};
+const LEAD={ok:false};
+const root=document.getElementById('root');
+const pct=v=>Math.round(v*100);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const CHK='<svg viewBox="0 0 12 12"><polyline points="1.5,6.5 4.5,9.5 10.5,2.5"/></svg>';
+const bar=p=>{document.getElementById('pbar').style.width=(p*100)+'%';};
+const BAAS=()=>A.P_role===0;
+const CQ=i=>(CTX[i].baas&&BAAS())?{...CTX[i],...CTX[i].baas}:CTX[i];
+const toTop=()=>window.scrollTo({top:0,behavior:'smooth'});
+const res=(h,p)=>'<div class="res"><h4>'+h+'</h4><p>'+p+'</p></div>';
+
+function radio(name,opts){return'<div class="opts">'+opts.map((o,i)=>
+ '<label class="opt'+(A[name]===i?' on':'')+'"><input type="radio" name="'+name+'" value="'+i+'"'+
+ (A[name]===i?' checked':'')+'><span class="dot"></span><span class="t">'+o+'</span></label>').join('')+'</div>';}
+
+function nav(back,label,prog){return'<div class="actions">'+
+ (back?'<button class="btn btn-s" id="back">'+svg('arrowL')+'Terug</button>':'')+
+ '<button class="btn btn-p" id="next">'+label+svg('arrowR')+'</button>'+
+ (prog?'<span class="note" id="prog"></span>':'')+'</div>'+
+ '<p class="err hidden" id="err">Beantwoord alle vragen op deze pagina om verder te gaan.</p>';}
+
+function bind(keys,onNext,onBack){
+ root.querySelectorAll('input[type=radio]').forEach(r=>r.addEventListener('change',e=>{
+  A[e.target.name]=+e.target.value;
+  if(!eersteVraagGetrackt){eersteVraagGetrackt=true;track('eerste vraag beantwoord');}
+  root.querySelectorAll('input[name="'+e.target.name+'"]').forEach(x=>x.closest('label').classList.toggle('on',x.checked));
+  const er=document.getElementById('err');if(er)er.classList.add('hidden');upd();}));
+ root.querySelectorAll('textarea').forEach(i=>i.addEventListener('input',e=>{A[e.target.id]=e.target.value;}));
+ const b=document.getElementById('back');if(b)b.onclick=onBack;
+ document.getElementById('next').onclick=()=>{
+  const miss=keys.filter(k=>A[k]===undefined);
+  if(miss.length){const er=document.getElementById('err');er.classList.remove('hidden');
+   const el=root.querySelector('[name="'+miss[0]+'"]');
+   if(el)el.closest('.block').scrollIntoView({behavior:'smooth',block:'center'});return;}
+  onNext();};
+ function upd(){const p=document.getElementById('prog'),d=keys.filter(k=>A[k]!==undefined).length;
+  if(p)p.textContent=d+' van '+keys.length+' beantwoord';bar(d/keys.length);}
+ upd();toTop();}
+
+/* ---- HUB ---- */
+function hub(){bar(0);
+ root.innerHTML='<div class="hero"><p class="eyebrow">'+svg('sparkle')+'Drie scans &middot; elk 5 &agrave; 10 minuten</p>'+
+ '<h1>Waar levert AI vandaag &eacute;cht iets op?</h1>'+
+ '<p>Je krijgt geen theorie maar een rapport met wat je deze week zelf kan uitproberen, inclusief de exacte tekst die je in ChatGPT of Copilot plakt.</p></div>'+
+ '<div class="head"><h2>Kies je scan</h2><p class="hint">Doe er &eacute;&eacute;n, of alle drie. Ze bouwen op elkaar voort.</p></div>'+
+ '<div class="bento bento-3">'+
+ card('persoon','user','Jouw eigen werk','Je kiest je functie en krijgt je vijf beste kandidaten, elk met een prompt die je meteen kan gebruiken.','8 vragen &middot; 5 min')+
+ card('bedrijf','building','Je bedrijf','Acht gebieden gescoord op wat er te winnen valt en hoe klaar je ervoor bent, met per gebied een test.','24 vragen &middot; 10 min')+
+ card('kader','shield','Het kader eronder','Afspraken, kennis, eigenaarschap en data. Bepaalt of wat je bouwt ook blijft werken.','10 vragen &middot; 5 min')+
+ '</div>';
+ root.querySelectorAll('button.tile').forEach(c=>c.onclick=()=>{page=0;
+  ({persoon:p_role,bedrijf:b_page,kader:k_page})[c.dataset.k]();});
+ toTop();}
+
+const card=(k,ic,t,d,m)=>'<button class="tile'+(done[k]?' did':'')+'" data-k="'+k+'">'+
+ sq(ic)+'<h3>'+t+'</h3><p>'+d+'</p>'+
+ (done[k]?'<span class="pill">ingevuld</span>':'')+
+ '<span class="meta">'+(done[k]?'Bekijk opnieuw':m)+svg('arrowR')+'</span></button>';
+
+/* ---- SCAN 1 ---- */
+function p_role(){
+ root.innerHTML='<div class="head"><p class="eyebrow-b">'+svg('user')+'Scan 1 &middot; jouw eigen werk</p>'+
+ '<h2>Welke functie oefen je uit?</h2>'+
+ '<p class="hint">Kies wat het dichtst aanleunt. Dit bepaalt welke taken je hierna te zien krijgt.</p></div>'+
+ '<div class="block"><p class="qlabel">Mijn functie sluit het best aan bij:</p>'+
+ radio('P_role',ROLES.map(r=>r.n))+'</div>'+nav(true,'Ga verder',false);
+ bind(['P_role'],()=>{role=ROLES[A.P_role];p_tasks();},hub);}
+
+function p_tasks(){
+ root.innerHTML='<div class="head"><p class="eyebrow-b">'+svg('user')+'Scan 1 &middot; '+esc(role.n)+'</p>'+
+ '<h2>Waar gaat je tijd naartoe?</h2>'+
+ '<p class="hint">Schat ruw. Het gaat om de verhouding tussen deze taken, niet om precisie.</p></div>'+
+ role.tasks.map((t,i)=>'<div class="block"><h3>'+t.n+'</h3>'+
+  (t.w?'<p class="sub">'+t.w+'</p>':'')+'<p class="qlabel">'+TIMEQ+'</p>'+
+  radio('P_t'+i,TIME)+'</div>').join('')+nav(true,'Ga verder',true);
+ bind(role.tasks.map((_,i)=>'P_t'+i),p_ctx,p_role);}
+
+function p_ctx(){
+ root.innerHTML='<div class="head"><p class="eyebrow-b">'+svg('user')+'Scan 1 &middot; jouw situatie</p>'+
+ '<h2>Wat kan je vandaag praktisch?</h2>'+
+ '<p class="hint">Deze vier vragen bepalen welke aanbevelingen realistisch zijn voor jou.</p></div>'+
+ CTX.map((c,ci)=>{const q=CQ(ci);
+  return'<div class="block"><h3>'+q.n+'</h3>'+(q.sub?'<p class="sub">'+q.sub+'</p>':'')+
+  radio('P_'+c.k,q.o)+'</div>';}).join('')+
+ '<div class="block"><h3>Waar wacht je het vaakst op?</h3>'+
+ '<p class="sub">Optioneel. E&eacute;n zin volstaat.</p>'+
+ '<textarea id="P_free" placeholder="Bijvoorbeeld: op goedkeuring van offertes">'+esc(A.P_free)+'</textarea></div>'+
+ nav(true,'Toon mijn resultaat',true);
+ bind(CTX.map(c=>'P_'+c.k),()=>gate('persoon'),p_tasks);}
+
+const MENSEN=[1,3,7,12];
+function p_data(){
+ const sc=role.tasks.map((t,i)=>({...t,time:A['P_t'+i],score:A['P_t'+i]*t.fit})).sort((a,b)=>b.score-a.score);
+ const top=sc.filter(t=>t.score>0&&t.fit>1).slice(0,5);
+ return{top,human:sc.filter(t=>t.fit===1&&t.time>=2),
+  zwaar:sc.filter(t=>t.fit>1&&t.time>=2).length,taken:sc.length,
+  stappen:top.reduce((s,t)=>s+(t.s?t.s.length:0),0),
+  prompts:top.filter(t=>t.pr).length,
+  ready:(A.P_tools+A.P_data+A.P_skill+A.P_steun)/12};}
+
+function p_head(){const d=p_data();
+ const r=pct(d.ready),ix=A.P_schaal||0,m=MENSEN[ix];
+ return{title:role.n,
+  line:d.top.length?'Dit zijn de taken waar voor jou het meeste te winnen valt. Bij elke staat wat je deze week concreet kan proberen.'
+   :'Je werk zit vooral in taken die je niet moet willen automatiseren. Dat is een geldige uitkomst.',
+  stats:[
+   d.zwaar?{i:'clock',n:d.zwaar,u:'',f:d.zwaar/d.taken,l:'Taken die veel tijd kosten en zich lenen',
+     k:'Van de '+d.taken+' taken in je rol. Elk kost je een paar uur per week of meer.'}
+    :{i:'clock',n:d.top.length,u:'',f:d.top.length/d.taken,l:'Taken waar AI je kan helpen',
+     k:'Geen enkele kost je een paar uur per week of meer, dus de winst blijft beperkt.'},
+   {i:'gauge',n:r,u:'%',f:d.ready,l:'Hoe klaar je omgeving is',
+    k:r<34?'Genoeg om zelf te beginnen, nog niet om systemen te koppelen.'
+      :r<67?'Genoeg om te starten zodra er afspraken zijn over wat mag.'
+      :'Genoeg om systemen aan elkaar te hangen, en daar zit de grootste winst.'},
+   {i:'user',n:m,u:'',f:(ix+1)/4,l:'Mensen die dit werk ook doen',
+    k:ix?'Wat jij vastlegt, werkt meteen voor '+m+' mensen in plaats van voor jou alleen.'
+        :'De winst blijft voorlopig bij jou. Prima om te starten, het bedrijf merkt het nog niet.'}]};}
+
+function promptBox(txt){
+ if(!txt)return'';
+ const id='pr'+Math.random().toString(36).slice(2,8);
+ return lbl('copy','Kopieer dit in je AI-tool')+'<div class="prompt"><pre id="'+id+'">'+esc(txt)+'</pre>'+
+ '<button class="copy" data-copy="'+id+'">'+svg('copy')+'Kopieer</button></div>';}
+
+function steps(arr){return arr.length?lbl('list','Doe dit nu')+'<ol class="steps">'+
+ arr.map(s=>'<li>'+s+'</li>').join('')+'</ol>':'';}
+
+function p_body(){const d=p_data();const rv=radarData();let h='';
+ h+='<div class="head"><h2>Je AI-profiel</h2><p class="hint">Afgeleid uit de aard van je taken en de tijd die je eraan besteedt. De vorm zegt meer dan de omvang.</p></div>'+
+  '<svg class="quad" viewBox="0 0 660 430">'+radarSVG(rv)+'</svg>'+
+  '<div class="res"><h4>'+sq('sparkle','sq-sm on')+'Wat deze vorm betekent</h4><p>'+radarTekst(rv)+'</p>'+
+  '<p><b>Schaal.</b> '+SCHAAL[A.P_schaal!==undefined?A.P_schaal:0]+'</p></div>';
+ if(d.top.length)h+='<div class="head"><h2>Je vijf beste kandidaten</h2>'+
+  '<p class="hint">Op volgorde van hoeveel tijd het kost maal hoe goed het zich ertoe leent. Begin bij nummer &eacute;&eacute;n en niet bij alle vijf tegelijk.</p></div>'+
+  d.top.map((t,i)=>'<div class="res"><h4><span class="rank">'+(i+1)+'</span>'+t.n+
+   '<span class="tag t-do">'+TIME[t.time].toLowerCase()+'</span></h4><p>'+t.u+'</p>'+
+   steps(t.s)+promptBox(t.pr)+
+   (t.bo?lbl('bolt','Wat een gebouwde versie hier extra doet')+'<p>'+t.bo+'</p>':'')+
+   (t.g?lbl('layers','Wat daarvoor nodig is')+'<p>'+t.g+'</p>':'')+'</div>').join('');
+ if(d.human.length)h+='<div class="head"><h2>Hier begin je niet aan</h2>'+
+  '<p class="hint">Deze taken kosten je veel tijd, maar ze vragen oordeel of persoonlijk contact. Automatiseren maakt ze slechter.</p></div>'+
+  d.human.map(t=>'<div class="res"><h4>'+t.n+'</h4><p>'+t.u+'</p>'+
+   (t.g?'<p style="margin-top:8px"><b>Wel nuttig:</b> '+t.g+'</p>':'')+'</div>').join('');
+ h+='<div class="head"><h2>Wat jouw situatie toelaat</h2>'+
+  '<p class="hint">Op basis van je vier antwoorden over tools, gegevens, ervaring en ondersteuning.</p></div>'+
+  res(CQ(0).o[A.P_tools], A.P_tools<=1
+   ? (BAAS()
+     ? 'Belangrijk: zolang er niets afgesproken is, gebruiken je mensen wat ze zelf vinden, met bedrijfsdata erin. Regel eerst betaalde bedrijfsaccounts met duidelijke afspraken over welke gegevens waar mogen. Dat kost weinig en het haalt meteen het grootste risico weg.'
+     : 'Belangrijk: zolang er geen duidelijke afspraken zijn, zet je geen klantgegevens, personeelsgegevens of contracten in een gratis AI-tool. Werk met verzonnen voorbeelddata of vraag je werkgever om een bedrijfsaccount, want dat is ook in zijn voordeel.')
+   : 'Je mag aan de slag met echte gegevens. Hou je aan de afspraken over wat waar mag.')+
+  res(CQ(1).o[A.P_data],A.P_data<=1?'Je grootste beperking is niet de tool maar waar je gegevens staan. Begin met taken waarbij jij de informatie zelf aanlevert: schrijven, samenvatten, documenten doornemen, voorbereiden. Alles wat uit een systeem moet komen, komt later.':'Je kan verder gaan dan schrijfwerk. Taken waarbij informatie uit systemen gehaald wordt, zijn voor jou haalbaar.')+
+  res(CQ(2).o[A.P_skill],A.P_skill<=1?'Neem kandidaat &eacute;&eacute;n en doe die twee weken lang consequent. E&eacute;n gewoonte is meer waard dan vijf experimenten. Reken erop dat je eerste twee pogingen tegenvallen. Dat ligt bijna altijd aan te weinig context in je vraag en niet aan de tool.':'Je volgende stap is niet meer leren prompten, maar &eacute;&eacute;n taak vastleggen zodat ze niet meer van jou persoonlijk afhangt. Schrijf op wat je precies vraagt en welke informatie je meegeeft.')+
+  res(CQ(4).o[A.P_steun],A.P_steun<=1?'Blijf bij wat je zelf kan opzetten zonder koppelingen. Alles wat meerdere systemen moet kruisen, heeft technische hulp nodig. Dat is geen reden om te wachten: de kandidaten hierboven werken met kopi&euml;ren en plakken.':'Koppelingen zijn haalbaar voor jou. Dat opent de taken waar informatie uit meerdere systemen samenkomt, en dat is waar de grootste winst zit.')+
+  (A.P_free?res('Waar je op wacht','Je schreef: &bdquo;'+esc(A.P_free)+'&ldquo; Wachten is zelden een technisch probleem. Kijk eerst na of er een afspraak ontbreekt over wie beslist en binnen welke termijn.'):'')+
+  '<div class="head"><h2>Je volgende twee weken</h2></div>'+
+  res('Week 1. E&eacute;n taak, elke dag','Neem kandidaat &eacute;&eacute;n en doe die twee weken consequent op de nieuwe manier. Niet drie taken tegelijk, want dan doe je er geen enkele lang genoeg om ze onder de knie te krijgen.')+
+  res('Week 2. Leg vast wat werkt','Bewaar de prompt die voor jou het beste werkte, met de aanpassingen die je gemaakt hebt. Dat is het verschil tussen iets van jou persoonlijk en iets dat een collega kan overnemen.')+
+  res('Wat je niet doet','Niets automatisch laten versturen naar klanten of leveranciers. Geen gegevens van herkenbare personen in tools zonder bedrijfsafspraak. En je neemt geen enkel resultaat over zonder het zelf te lezen.');
+ return h;}
+
+/* ---- SCAN 2 ---- */
+function b_page(){
+ const set=page===0?DOMAINS.slice(0,3):DOMAINS.slice(3);
+ root.innerHTML='<div class="head"><p class="eyebrow-b">'+svg('building')+'Scan 2 &middot; deel '+(page+1)+' van 2</p><h2>'+
+ (page===0?'Zicht, opvolging en overleg':'Verkoop, geld, operations en kennis')+'</h2>'+
+ '<p class="hint">Antwoord voor het bedrijf als geheel, niet voor jezelf. Bij twijfel volstaat je beste inschatting.</p></div>'+
+ set.map(d=>'<div class="block"><h3>'+d.n+'</h3><p class="sub">'+d.s+'</p>'+
+  Q2.map(q=>'<p class="qlabel">'+q.p+'</p>'+radio(d.c+'_'+q.k,q.o)).join('')+
+  '</div>').join('')+nav(true,'Ga verder',true);
+ bind(set.flatMap(d=>Q2.map(q=>d.c+'_'+q.k)),
+  ()=>{if(page<1){page=1;b_page();}else{page=2;b_org();}},
+  ()=>{if(page===0)hub();else{page=0;b_page();}});}
+
+function b_org(){
+ root.innerHTML='<div class="head"><p class="eyebrow-b">'+svg('building')+'Scan 2 : deel 3 van 3</p>'+
+ '<h2>Drie vragen over je organisatie</h2>'+
+ '<p class="hint">Deze drie bepalen niet w&aacute;t je aanpakt, maar hoe. Ze wegen mee in elk advies hierna.</p></div>'+
+ ORG.map((o,i)=>'<div class="block"><h3>'+o.n+'</h3><p class="qlabel">'+o.p+'</p>'+
+  radio('O'+i,o.o)+'</div>').join('')+nav(true,'Toon mijn resultaat',true);
+ bind(ORG.map((_,i)=>'O'+i),()=>gate('bedrijf'),()=>{page=1;b_page();});}
+
+function kaderProxy(){const ks=[];PILLARS.forEach((p,i)=>p.qs.forEach((_,j)=>ks.push('K'+i+'_'+j)));
+ const a=ks.filter(k=>A[k]!==undefined);return a.length?a.reduce((s,k)=>s+A[k],0)/(a.length*3):null;}
+
+function scoreDomain(d){const potential=(A[d.c+'_tijd']+A[d.c+'_routine'])/6,kp=kaderProxy();
+ const readiness=kp===null?A[d.c+'_info']/3:(A[d.c+'_info']/3)*.7+kp*.3;
+ let v;if(potential>=.5&&readiness>=.5)v='do';else if(potential>=.5)v='clean';
+ else if(readiness>=.5)v='small';else v='park';return{...d,potential,readiness,v};}
+
+const VERDICT={do:{l:"Nu doen",c:"t-do",t:"Genoeg te winnen en de informatie is bereikbaar. Hier begin je, en hieronder staat hoe je het deze week zelf test."},
+ clean:{l:"Eerst opruimen",c:"t-clean",t:"Hier valt veel te winnen, maar de informatie zit nog niet op een bruikbare plek. Eerst structuur, dan pas bouwen."},
+ small:{l:"Klein maar makkelijk",c:"t-low",t:"Haalbaar, maar er staat weinig tijd tegenover. Meenemen als je toch bezig bent, geen eigen project."},
+ park:{l:"Laat liggen",c:"t-low",t:"Weinig te winnen en weinig houvast. Hier heb je vandaag niets te zoeken."}};
+
+function b_head(){const D=DOMAINS.map(scoreDomain);
+ const nDo=D.filter(d=>d.v==='do').length,nCl=D.filter(d=>d.v==='clean').length,nT=nDo+nCl;
+ const hoog=Math.max(...D.map(d=>d.potential));
+ return{title:'Je bedrijf',
+  line:nDo===0&&nCl>0?'Er is duidelijk potentieel, maar geen enkel gebied is er vandaag klaar voor. Je eerste werk zit in structuur, niet in bouwen.'
+   :nDo===0?'Op dit moment springt geen enkel gebied eruit. Dat is een geldige uitkomst: niet elk bedrijf heeft hier vandaag iets te halen.'
+   :nDo+(nDo===1?' gebied is':' gebieden zijn')+' er klaar voor, '+nCl+(nCl===1?' vraagt':' vragen')+' eerst opruimwerk. De rest kan wachten.',
+  stats:[
+   {i:'check',n:nDo,u:'',f:nDo/8,l:'Gebieden waar je vandaag kan starten',
+    k:nDo?'Genoeg te winnen, en de informatie zit al op een bruikbare plek.'
+         :'Geen van de acht gebieden haalt vandaag de drempel.'},
+   {i:'alert',n:nCl,u:'',f:nCl/8,l:'Gebieden die eerst opruimwerk vragen',
+    k:nCl?'Hier valt te winnen, maar de informatie zit nog verspreid.'
+         :'Er blijft bij jullie niets liggen door verspreide informatie.'},
+   nT?{i:'bolt',n:nT,u:'',f:nT/8,l:'Tests van een halfuur in je rapport',
+       k:'Elk met de vraag die je letterlijk in je AI-tool plakt.'}
+     :{i:'target',n:pct(hoog),u:'%',f:hoog,l:'Hoogste potentieel van alle gebieden',
+       k:'Dat is te laag om er vandaag aan te beginnen, en dat is een geldige uitkomst.'}]};}
+
+function b_body(){const D=DOMAINS.map(scoreDomain);
+ return'<div class="res" style="margin-top:20px"><h4>'+sq('grid','sq-sm on')+'Waar elk gebied staat</h4>'+
+ '<p>Hoe hoger, hoe meer er te winnen valt. Hoe verder naar rechts, hoe klaarder je ervoor bent.</p>'+
+ (kaderProxy()===null?'<p>Doe ook scan 3, want dan wordt de gereedheid preciezer berekend.</p>':'')+'</div>'+
+ '<svg class="quad" viewBox="0 0 660 470">'+quadSVG(D)+'</svg>'+
+ '<div class="legend">'+D.map(d=>'<span><b>'+d.c+'</b>'+d.n+'</span>').join('')+'</div>'+
+ ['do','clean','small','park'].map(v=>{
+  const l=D.filter(d=>d.v===v).sort((a,b)=>b.potential-a.potential);if(!l.length)return'';
+  return'<div class="head"><h2>'+VERDICT[v].l+'</h2><p class="hint">'+VERDICT[v].t+'</p></div>'+
+  l.map(d=>{let h='<div class="res"><h4>'+d.n+'<span class="tag '+VERDICT[v].c+'">'+
+    pct(d.potential)+' / '+pct(d.readiness)+'</span></h4>';
+   if(v==='do'){h+=lbl('bolt',d.test.t)+'<ol class="steps">'+
+     d.test.s.map(s=>'<li>'+s+'</li>').join('')+'</ol><p><b>Wat je eruit leert:</b> '+d.test.r+'</p>'+
+     lbl('layers','Wat je daarna kan laten bouwen')+
+     d.a.map(a=>'<p><b>'+a.n+'</b>. '+a.d+' <i>Nodig: '+a.need+'. Richttijd: '+a.w+'.</i></p>').join('')+
+     lbl('clock','Ondertussen')+d.tips.map(t=>'<p>&middot; '+t+'</p>').join('');}
+   else if(v==='clean'){h+=lbl('alert','Eerst dit opruimen')+d.clean.map(t=>'<p>&middot; '+t+'</p>').join('')+
+     lbl('bolt','Test intussen of het de moeite wordt')+'<ol class="steps">'+
+     d.test.s.map(s=>'<li>'+s+'</li>').join('')+'</ol>'+
+     lbl('layers','Daarna wordt dit mogelijk')+d.a.map(a=>'<p><b>'+a.n+'</b>. '+a.d+'</p>').join('');}
+   else if(v==='small'){h+=d.tips.slice(0,2).map(t=>'<p>&middot; '+t+'</p>').join('');}
+   return h+'</div>';}).join('');}).join('')+
+ orgBlok()+
+ '<div class="head"><h2>Je eerste dertig dagen</h2></div>'+
+ res('Week 1. Meet &eacute;&eacute;n ding','Neem het bovenste gebied en meet wat het vandaag kost: hoe vaak per week, hoeveel minuten per keer, hoeveel mensen. Vermenigvuldig dat, en je hebt je nulmeting en later je enige bewijs dat het gewerkt heeft.')+
+ res('Week 2. Wijs een eigenaar aan','Iemand die het draagt als de bouwer weg is, met tijd ervoor in zijn agenda. Dit is de stap die het vaakst wordt overgeslagen, en meteen de belangrijkste reden dat projecten stilvallen.')+
+ res('Week 3 en 4. Bouw &eacute;&eacute;n ding, klein','E&eacute;n toepassing in productie, met een mens die de eindbeslissing neemt. Niets dat automatisch naar een klant of leverancier vertrekt. Meet daarna opnieuw en vergelijk met week 1.')+
+ res('Waar je niet aan begint','Voorspellen van vraag, voorraad of cash zolang je historiek niet proper is. Beslissingen over aanwerving of promotie, want die vallen onder de hoogrisicoregels van de AI Act. En alles wat zonder menselijke controle naar buiten gaat.');}
+
+
+function orgBlok(){
+ if(A.O0===undefined)return'';
+ const duid=(o,v)=>v<=0?o.low:v<=2?o.mid:o.high;
+ return'<div class="head"><h2>Wat dit zegt over je organisatie</h2>'+
+ '<p class="hint">Niet w&aacute;t je aanpakt, maar hoe je het aanpakt. Deze drie wegen mee in elk advies hierboven.</p></div>'+
+ ORG.map((o,i)=>'<div class="res"><h4>'+o.n+'<span class="tag '+(A['O'+i]>=2?'t-clean':'t-do')+'">'+
+  o.o[A['O'+i]]+'</span></h4><p>'+duid(o,A['O'+i])+'</p></div>').join('')+
+ (A.O2>=2?res('Wat dit concreet betekent voor alles hierboven','Bij jullie foutrisico laat je niets zonder tussenkomst naar buiten gaan. Elke toepassing die een klant, een leverancier of de veiligheid raakt, eindigt met een mens die aftekent. Bouw dat vanaf de eerste versie in, want achteraf een controlepunt toevoegen lukt zelden.'):'')+
+ (A.O0>=2?res('Je beste kandidaat staat misschien niet in de lijst hierboven','Werk dat aan &eacute;&eacute;n persoon hangt, is bij jullie een re&euml;el risico. Een vraagbaak op wat die persoon weet, scoort in deze scan niet noodzakelijk hoog op tijdswinst, maar hij neemt wel een risico weg dat iedereen voelt. Dat is intern vaak makkelijker te verkopen dan bespaarde uren.'):'')+
+ (A.O1>=2?res('Kijk eerst naar wachttijd, niet naar werktijd','Bij jullie ligt werk regelmatig stil in afwachting van een beslissing. Dan levert het verkorten van die wachttijd meer op dan het versnellen van het werk zelf. Ga wel eerst na waar het wachten aan ligt. Ontbreekt de informatie, dan is dat op te lossen. Ontbreekt de afspraak over wie beslist, dan is het een proceskeuze en heeft geen enkele tool er vat op.'):'');}
+
+function quadSVG(doms){
+ const L=56,R=634,T=24,B=412,mx=(L+R)/2,my=(T+B)/2,X=r=>L+r*(R-L),Y=p=>B-p*(B-T);
+ let s='<rect x="'+mx+'" y="'+T+'" width="'+(R-mx)+'" height="'+(my-T)+'" fill="#E6F4F1" opacity=".7"/>'+
+ '<rect x="'+L+'" y="'+T+'" width="'+(mx-L)+'" height="'+(my-T)+'" fill="#FDF3E7" opacity=".8"/>'+
+ '<rect x="'+L+'" y="'+T+'" width="'+(R-L)+'" height="'+(B-T)+'" fill="none" stroke="#E3E8EE"/>'+
+ '<line x1="'+mx+'" y1="'+T+'" x2="'+mx+'" y2="'+B+'" stroke="#E3E8EE"/>'+
+ '<line x1="'+L+'" y1="'+my+'" x2="'+R+'" y2="'+my+'" stroke="#E3E8EE"/>';
+ const cap=(x,y,t,a,c)=>'<text x="'+x+'" y="'+y+'" font-family="Inter,sans-serif" font-size="12.5" '+
+  'font-weight="600" letter-spacing=".04em" fill="'+(c||'#697386')+'" text-anchor="'+a+'">'+t+'</text>';
+ s+=cap(mx+14,T+24,'NU DOEN','start','#0E7C66')+cap(mx-14,T+24,'EERST OPRUIMEN','end','#B45309')+
+  cap(mx+14,B-14,'KLEIN MAAR MAKKELIJK','start')+cap(mx-14,B-14,'LAAT LIGGEN','end')+
+  cap(mx,B+38,'GEREEDHEID \u2192','middle')+
+  '<text x="20" y="'+my+'" font-family="Inter,sans-serif" font-size="12.5" font-weight="600" '+
+  'letter-spacing=".04em" fill="#697386" text-anchor="middle" transform="rotate(-90 20 '+my+')">POTENTIEEL \u2192</text>';
+ const seen={};
+ doms.forEach(d=>{const k=Math.round(d.potential*20)+'_'+Math.round(d.readiness*20);
+  const n=seen[k]=(seen[k]||0);seen[k]++;const rad=n?14:0;
+  const cx=X(d.readiness)+Math.cos(n*1.9)*rad,cy=Y(d.potential)+Math.sin(n*1.9)*rad;
+  const dk=d.v==='do'||d.v==='clean';
+  s+='<circle cx="'+cx+'" cy="'+cy+'" r="15" fill="'+(dk?'#4F46E5':'#fff')+'" stroke="'+(dk?'#4F46E5':'#C0C8D4')+'" stroke-width="1.5"/>'+
+   '<text x="'+cx+'" y="'+(cy+4.8)+'" font-family="Inter,sans-serif" font-size="13" font-weight="700" '+
+   'fill="'+(dk?'#fff':'#425466')+'" text-anchor="middle">'+d.c+'</text>';});
+ return s;}
+
+/* ---- SCAN 3 ---- */
+function k_page(){
+ root.innerHTML='<div class="head"><p class="eyebrow-b">'+svg('shield')+'Scan 3 &middot; het kader</p>'+
+ '<h2>Blijft staan wat je bouwt?</h2>'+
+ '<p class="hint">Tien vragen over afspraken, kennis, eigenaarschap, data en wat er vandaag al gebeurt.</p></div>'+
+ PILLARS.map((p,i)=>'<div class="block"><h3>'+p.n+'</h3>'+
+  p.qs.map((q,j)=>'<p class="qlabel">'+q.p+'</p>'+radio('K'+i+'_'+j,q.o)).join('')+
+  '</div>').join('')+nav(true,'Toon mijn resultaat',true);
+ bind(PILLARS.flatMap((p,i)=>p.qs.map((_,j)=>'K'+i+'_'+j)),()=>gate('kader'),hub);}
+
+function k_data(){const sc=PILLARS.map((p,i)=>({...p,v:p.qs.reduce((s,_,j)=>s+A['K'+i+'_'+j],0)/(p.qs.length*3)}));
+ const overall=sc.reduce((s,p)=>s+p.v,0)/sc.length;
+ return{sc,overall,lvl:LEVELS.find(l=>overall<l.max),weak:[...sc].sort((a,b)=>a.v-b.v)[0]};}
+
+function k_head(){const d=k_data();
+ const ok=d.sc.filter(p=>p.v>=.5).length;
+ return{title:d.lvl.n,line:d.lvl.d,
+  stats:[
+   {i:'shield',n:pct(d.overall),u:'%',f:d.overall,l:'Gereedheid van je organisatie',
+    k:'Het gemiddelde over afspraken, kennis, eigenaarschap, data en praktijk.'},
+   {i:'check',n:ok,u:'',f:ok/5,l:'Pijlers die op orde staan',
+    k:ok?'Van de vijf pijlers die samen bepalen of iets blijft draaien.':'Geen van de vijf pijlers haalt vandaag de helft.'},
+   {i:'alert',n:pct(d.weak.v),u:'%',f:d.weak.v,l:'Score van je zwakste pijler',
+    k:'Dat is '+d.weak.n.toLowerCase()+', en die bepaalt wat er blijft staan.'}]};}
+
+function k_body(){const d=k_data();
+ return'<div class="head"><h2>Per pijler</h2>'+
+ '<p class="hint">Je zwakste schakel bepaalt wat er blijft staan, niet je sterkste.</p></div>'+
+ d.sc.map(p=>'<div class="res"><h4>'+p.n+'<span class="tag '+(p.v>=.5?'t-do':'t-clean')+'">'+pct(p.v)+'</span></h4>'+
+  '<p>'+(p.v>=.5?p.high:p.low)+'</p></div>').join('')+
+ '<div class="head"><h2>Waar je begint: '+d.weak.n.toLowerCase()+'</h2>'+
+ '<p class="hint">Dat is vandaag je zwakste schakel. Twee stappen, in deze volgorde.</p></div>'+
+ (KADER_ACTIES[d.weak.n]||[]).map(a=>res(a.t,a.d)).join('')+
+ '<div class="head"><h2>Wat er sowieso moet gebeuren</h2></div>'+
+ res('Geletterdheid is geen keuze','De AI Act vraagt sinds februari 2025 dat organisaties zorgen voor voldoende AI-geletterdheid bij iedereen die met AI werkt, ongeacht risiconiveau. Er staan geen directe boetes op, maar schade die met degelijke opleiding vermijdbaar was, weegt mee in je zorgvuldigheidsplicht.')+
+ res('Eigenaar voor techniek','Wijs iemand aan voor je iets bouwt, niet erna. Zonder eigenaar staat elk systeem binnen zes maanden stil, en dan leert je organisatie dat AI niet werkt. Dat is duurder om terug te draaien dan het project zelf.')+
+ (done.bedrijf?res('Je bedrijfsscan is bijgewerkt','Deze antwoorden wegen nu mee in de gereedheid per gebied. Open scan 2 opnieuw voor het geactualiseerde beeld.'):'');}
+
+const HEAD={persoon:p_head,bedrijf:b_head,kader:k_head};
+const BODY={persoon:p_body,bedrijf:b_body,kader:k_body};
+const TITLES={persoon:'Jouw eigen werk',bedrijf:'Je bedrijf',kader:'Het kader eronder'};
+
+/* ---- LEADFORMULIER ---- */
+const fld=(id,l,t,ph)=>'<div class="f"><label for="'+id+'">'+l+'</label>'+
+ '<input id="'+id+'" type="'+t+'" placeholder="'+(ph||'')+'"></div>';
+const sel=(id,l,o)=>'<div class="f"><label for="'+id+'">'+l+'</label><select id="'+id+'">'+
+ '<option value="">Kies&hellip;</option>'+o.map(x=>'<option>'+x+'</option>').join('')+'</select></div>';
+
+/* wat er precies achter het formulier zit, uit de antwoorden zelf geteld */
+function inhoud(kind){
+ if(kind==='persoon'){const d=p_data();
+  return[d.top.length?d.top.length+' kandidaten uit jouw eigen week, gerangschikt op wat ze opleveren.'
+    :'Een eerlijke uitleg waarom automatiseren bij jouw werk weinig oplevert, en wat dan wel helpt.',
+   d.prompts?d.prompts+' kant-en-klare prompts en '+d.stappen+' stappen die je vandaag nog kan zetten.'
+    :'Per taak wat je er vandaag zelf mee kan doen, zonder iets te bouwen.',
+   'Per kandidaat wat een gebouwde versie extra doet, en wat daarvoor nodig is aan toegang en koppelingen.',
+   'Je plan voor de komende twee weken, en waar je beter niet aan begint.'];}
+ if(kind==='bedrijf'){const D=DOMAINS.map(scoreDomain);
+  const nT=D.filter(d=>d.v==='do'||d.v==='clean').length;
+  return['Alle acht de gebieden in &eacute;&eacute;n beeld, met hoeveel er te winnen valt en hoe klaar je ervoor bent.',
+   nT?nT+' tests van een halfuur, met de exacte vraag erbij en wat je eruit leert.'
+    :'Per gebied waarom het vandaag blijft liggen, en wat dat zou veranderen.',
+   'Per gebied wat je kan laten bouwen, met wat het vraagt aan toegang en hoelang het duurt.',
+   'Je eerste dertig dagen, week per week, plus waar je niet aan begint.'];}
+ const k=k_data();
+ return['Je score per pijler, met wat die score concreet betekent voor jullie.',
+  'Twee stappen voor je zwakste pijler, '+k.weak.n.toLowerCase()+', in de juiste volgorde.',
+  'Wat de AI Act van je vraagt rond geletterdheid, en wat er sowieso geregeld moet zijn.',
+  done.bedrijf?'Je bedrijfsrapport wordt meteen bijgewerkt met deze tien antwoorden.'
+   :'Doe je later ook de bedrijfsscan, dan wordt die preciezer door deze tien antwoorden.'];}
+
+const buit=arr=>'<ul class="buit">'+arr.map(t=>'<li>'+svg('check')+'<span>'+t+'</span></li>').join('')+'</ul>';
+
+function gate(kind){
+ done[kind]=true;pending=kind;bar(1);
+ track('laatste vraag bereikt',kind);
+ if(LEAD.ok){report(kind);return;}
+ const h=HEAD[kind]();
+ root.innerHTML=hero(kind,h)+stats(h)+'<div class="locked">'+BODY[kind]()+'</div>'+
+ '<div class="panel accent"><p class="eyebrow-b">'+svg('check')+'Nog &eacute;&eacute;n stap</p>'+
+ '<h2 style="font-size:22px">Bekijk je volledige rapport</h2>'+
+ '<p class="hint">Dit staat er voor jou in:</p>'+buit(inhoud(kind))+
+ '<p class="hint req">Je krijgt het meteen te zien en je kan het downloaden. Enkel je naam, e-mail en bedrijf zijn verplicht.</p>'+
+ '<div class="fgrid">'+
+ fld('L_name','Naam','text','Voornaam en naam')+
+ fld('L_email','E-mail','email','naam@bedrijf.be')+
+ sel('L_func','Je functie (optioneel)',['Zaakvoerder of eigenaar','Directie of management','Afdelingshoofd','Medewerker','Zelfstandige','Andere'])+
+ fld('L_co','Bedrijf','text','Naam van je bedrijf')+
+ sel('L_size','Aantal medewerkers (optioneel)',['1 tot 9','10 tot 49','50 tot 249','250 of meer'])+
+ fld('L_sector','Sector (optioneel)','text','')+
+ '</div>'+
+ chk('c1','L_ok','Ik ga ermee akkoord dat '+OWNER+' mijn gegevens en resultaten bewaart om mij dit rapport te bezorgen en er eventueel over te contacteren.')+
+ chk('c2','L_news','Hou me op de hoogte met praktische AI-inzichten voor bedrijven. Optioneel, uitschrijven kan altijd.')+
+ '<div class="actions"><button class="btn btn-p" id="submit">Toon mijn rapport</button>'+
+ '<span class="note" id="lmsg"></span></div>'+
+ '<p class="err hidden" id="lerr"></p></div>';
+ ['L_name','L_email','L_co','L_sector','L_func','L_size'].forEach(k=>{
+  const el=document.getElementById(k);el.value=A[k]||'';
+  el.addEventListener('input',e=>{A[k]=e.target.value;});
+  el.addEventListener('change',e=>{A[k]=e.target.value;});});
+ [['c1','L_ok'],['c2','L_news']].forEach(([id,key])=>{
+  const l=document.getElementById(id),i=l.querySelector('input');
+  i.addEventListener('change',()=>{A[key]=i.checked;l.classList.toggle('on',i.checked);});});
+ document.getElementById('submit').onclick=submit;
+ animeerStats();toTop();}
+
+const chk=(id,key,txt)=>'<label class="check'+(A[key]?' on':'')+'" id="'+id+'">'+
+ '<input type="checkbox"'+(A[key]?' checked':'')+'><span class="cbox">'+CHK+'</span><span>'+txt+'</span></label>';
+
+function submit(){
+ const e=document.getElementById('lerr'),b=document.getElementById('submit');
+ const fail=m=>{e.textContent=m;e.classList.remove('hidden');};
+ if(!(A.L_name||'').trim())return fail('Vul je naam in.');
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test((A.L_email||'').trim()))return fail('Vul een geldig e-mailadres in.');
+  if(!(A.L_co||'').trim())return fail('Vul de naam van je bedrijf in.');
+  if(!A.L_ok)return fail('Vink het akkoord aan om je rapport te bekijken.');
+ e.classList.add('hidden');LEAD.ok=true;b.disabled=true;
+ document.getElementById('lmsg').textContent='Momentje\u2026';
+ track('e-mail achtergelaten');
+ send().finally(()=>report(pending));}
+
+function send(){
+ const payload={scan:pending,naam:A.L_name,email:A.L_email,
+  functie:A.L_func,bedrijf:A.L_co,grootte:A.L_size,sector:A.L_sector||'',nieuwsbrief:!!A.L_news,
+  rol:role?role.n:null,bron:BRON,samenvatting:HEAD[pending](),
+  antwoorden:Object.fromEntries(Object.entries(A).filter(([k])=>!k.startsWith('L_')))};
+ return supaInsert('scans',payload);}
+
+
+const SHARE_URL="https://madaco.be/aiscan";
+function shareBlok(kind){
+ const url=SHARE_URL||(location&&location.href?location.href.split('#')[0]:'');
+ const T={persoon:'een scan die toont waar AI in je eigen werk het meeste oplevert',
+  bedrijf:'een scan die toont waar in een bedrijf AI vandaag het meeste oplevert',
+  kader:'een scan die toont of je organisatie klaar is om met AI te werken'}[kind];
+ const onderwerp=encodeURIComponent('Ik denk dat dit iets voor jou is');
+ const body=encodeURIComponent('Dag,\n\nIk heb net '+T+' ingevuld. Het duurt een tiental minuten en je krijgt meteen een rapport met dingen die je zelf kan uitproberen.\n\n'+url+'\n\nBenieuwd wat er bij jou uitkomt.');
+ return'<div class="panel accent noprint" data-strip style="margin-top:26px"><div class="phead">'+sq('user')+
+ '<div><h3>Vond je dit nuttig?</h3><p style="color:var(--mute);font-size:15px;margin:4px 0 0">'+
+ 'Stuur het door naar iemand die er ook iets aan heeft. Een collega, een mede-ondernemer, of iemand in je team die met dit soort werk bezig is.</p></div></div>'+
+ '<div class="actions" style="padding-top:18px">'+
+ '<a class="btn btn-p" href="mailto:?subject='+onderwerp+'&body='+body+'">Doorsturen per mail'+svg('arrowR')+'</a>'+
+ (url?'<button class="btn btn-s" id="cplink">'+svg('copy')+'Kopieer de link</button>':'')+
+ '</div><p class="note" id="cpmsg" style="margin-top:10px"></p></div>';}
+
+/* ---- RAPPORT ---- */
+const hero=(kind,h)=>'<div class="hero"><p class="eyebrow">'+svg('flag')+'Rapport &middot; '+TITLES[kind]+'</p>'+
+ '<h1>'+(h.title||TITLES[kind])+'</h1><p>'+h.line+'</p></div>';
+const stats=h=>'<div class="bento bento-'+h.stats.length+'">'+h.stats.map(s=>{
+ const suf=s.u?'<em>'+s.u+'</em>':'';
+ const f=Math.round(Math.max(0,Math.min(1,s.f||0))*100);
+ return'<div class="stat">'+sq(s.i||'target','on')+
+  '<p class="n" data-to="'+s.n+'" data-suf="'+(s.u||'')+'">'+s.n+suf+'</p>'+
+  '<p class="l">'+s.l+'</p>'+(s.k?'<p class="k">'+s.k+'</p>':'')+
+  '<div class="track"><i data-w="'+f+'"></i></div></div>';}).join('')+'</div>';
+
+/* de cijfers tellen op en de balken lopen vol, tenzij de bezoeker beweging uitzet */
+function animeerStats(){
+ const stil=!window.requestAnimationFrame||(window.matchMedia&&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+ root.querySelectorAll('.stat').forEach(el=>{
+  const n=el.querySelector('.n'),b=el.querySelector('.track i');
+  const w=b?(b.getAttribute('data-w')||'0'):'0';
+  const to=n?parseFloat(n.getAttribute('data-to')):NaN;
+  const suf=n?(n.getAttribute('data-suf')||''):'';
+  const eind=()=>{if(b)b.style.width=w+'%';
+   if(n&&isFinite(to))n.innerHTML=to+(suf?'<em>'+suf+'</em>':'');};
+  if(stil){eind();return;}
+  if(n&&isFinite(to))n.innerHTML='0'+(suf?'<em>'+suf+'</em>':'');
+  const start=Date.now(),duur=700;
+  const stap=()=>{const p=Math.min((Date.now()-start)/duur,1),e=1-Math.pow(1-p,3);
+   if(n&&isFinite(to))n.innerHTML=Math.round(to*e)+(suf?'<em>'+suf+'</em>':'');
+   if(p<1)window.requestAnimationFrame(stap);else eind();};
+  window.requestAnimationFrame(()=>{if(b)b.style.width=w+'%';stap();});});}
+
+const MEENEMEN={
+ persoon:['Alles wat hierboven staat, inclusief je prompts, in &eacute;&eacute;n bestand dat offline opent.',
+  'Door te sturen naar je zaakvoerder of je collega, zodat jullie hetzelfde voor ogen hebben.',
+  'Over drie maanden opnieuw te openen, om te vergelijken met waar je dan staat.'],
+ bedrijf:['Alle acht de gebieden met hun tests en bouwvoorstellen, in &eacute;&eacute;n bestand dat offline opent.',
+  'Door te sturen naar je directieteam of je IT-partner, als vertrekpunt voor het gesprek.',
+  'Over drie maanden opnieuw in te vullen, om te zien wat er bewogen heeft.'],
+ kader:['Je score per pijler met de twee eerste stappen, in &eacute;&eacute;n bestand dat offline opent.',
+  'Door te sturen naar wie bij jullie over afspraken en opleiding gaat.',
+  'Bruikbaar als bijlage bij je beleid, want de AI Act vraagt dat je kan tonen wat je gedaan hebt.']};
+
+function report(kind){
+ const h=HEAD[kind]();
+ root.innerHTML=hero(kind,h)+stats(h)+
+ '<div class="keep noprint" data-strip>'+svg('alert')+
+ '<span>Dit rapport bestaat enkel in dit venster. Sluit je de pagina, dan is het weg. '+
+ '<button class="lnk" id="dl2">Bewaar het nu</button>.</span></div>'+
+ BODY[kind]()+
+ '<div class="panel" style="margin-top:26px"><div class="phead">'+sq('arrowR')+'<div><h3>'+nextLine()+'</h3><p style="color:var(--mute);font-size:15px;margin-top:4px">'+nextHint()+'</p></div></div></div>'+
+ shareBlok(kind)+
+ '<div class="panel accent noprint" data-strip style="margin-top:26px"><div class="phead">'+sq('download')+
+ '<div><h3>Neem je rapport mee</h3><p class="sub">Je krijgt een bestand dat je kan bewaren, doorsturen en later opnieuw openen.</p></div></div>'+
+ buit(MEENEMEN[kind])+
+ '<div class="actions" style="padding-top:0"><button class="btn btn-p" id="dl">Download je rapport'+svg('download')+'</button>'+
+ '<button class="btn btn-s" id="prt">'+svg('printer')+'Bewaar als pdf</button>'+
+ '<button class="btn btn-s" id="home">'+svg('home')+'Terug naar de scans</button></div>'+
+ '<p class="note" id="msg" style="margin-top:12px"></p></div>';
+ document.getElementById('home').onclick=hub;
+ document.getElementById('prt').onclick=()=>window.print();
+ const cl=document.getElementById('cplink');
+ if(cl)cl.onclick=()=>{navigator.clipboard.writeText(SHARE_URL||location.href.split('#')[0]).then(
+  ()=>{document.getElementById('cpmsg').textContent='Link gekopieerd.';},
+  ()=>{document.getElementById('cpmsg').textContent='Kopi\u00ebren lukte niet.';});};
+ document.getElementById('dl').onclick=()=>download(kind);
+ document.getElementById('dl2').onclick=()=>download(kind);
+ wireCopy();animeerStats();toTop();}
+
+function wireCopy(){
+ root.querySelectorAll('.copy').forEach(b=>b.onclick=()=>{
+  const t=document.getElementById(b.dataset.copy).textContent;
+  navigator.clipboard.writeText(t).then(()=>{b.textContent='Gekopieerd';
+   setTimeout(()=>b.textContent='Kopieer',1800);},()=>{b.textContent='Selecteer handmatig';});});}
+
+function nextLine(){const left=Object.keys(done).filter(k=>!done[k]);
+ return left.length?'Doe ook de scan over '+TITLES[left[0]].toLowerCase():'Je hebt alle drie de scans gedaan';}
+function nextHint(){const left=Object.keys(done).filter(k=>!done[k]);
+ if(!left.length)return'Leg de drie rapporten naast elkaar. Waar jouw eigen winst en die van het bedrijf uit elkaar lopen, zit meestal het echte werk.';
+ return{persoon:'Kijk wat er in jouw eigen week te winnen valt. Dat is het snelst voelbaar en je kan er deze week al mee starten.',
+  bedrijf:'Breng in kaart waar in de organisatie het meeste te halen valt, met per gebied een test van een halfuur.',
+  kader:'Bepaal of wat je bouwt ook blijft werken. Dit verfijnt meteen je bedrijfsrapport.'}[left[0]];}
+
+function download(kind){
+ track('rapport gedownload',kind);
+ const kopie=root.cloneNode(true);
+ kopie.querySelectorAll('[data-strip],.copy,.noprint').forEach(n=>n.remove());
+ kopie.querySelectorAll('.track i').forEach(n=>{n.style.width=n.getAttribute('data-w')+'%';});
+ kopie.querySelectorAll('.stat .n').forEach(n=>{const s=n.getAttribute('data-suf');
+  n.innerHTML=n.getAttribute('data-to')+(s?'<em>'+s+'</em>':'');});
+ const body=kopie.innerHTML;
+ const who=[A.L_co,A.L_name].filter(Boolean).map(esc).join(' \u00b7 ');
+ const date=new Date().toLocaleDateString('nl-BE',{day:'numeric',month:'long',year:'numeric'});
+ const doc='<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8">'+
+  '<meta name="viewport" content="width=device-width,initial-scale=1"><title>AI-scan: '+
+  TITLES[kind]+(A.L_co?': '+esc(A.L_co):'')+'</title>'+
+  '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">'+
+  '<style>'+document.querySelector('style').textContent+'</style></head><body><div class="wrap">'+
+  body+'<footer>AI-scan \u00b7 '+TITLES[kind]+(who?' \u00b7 '+who:'')+' \u00b7 '+date+
+  '. Dit rapport komt uit je eigen antwoorden en is een startpunt, geen audit.</footer></div></body></html>';
+ const blob=new Blob([doc],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob);
+ const a=document.createElement('a');
+ const slug=(A.L_co||kind).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||kind;
+ a.href=url;a.download='ai-scan-'+kind+'-'+slug+'.html';
+ document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+ const m=document.getElementById('msg');
+ if(m)m.textContent='Bewaard als '+a.download+'. Open het bestand in je browser. Wil je er een pdf van, gebruik dan Afdrukken en kies Bewaren als pdf.';
+ const k=root.querySelector('.keep');
+ if(k){k.classList.add('done');
+  k.innerHTML=svg('check')+'<span>Je rapport staat nu bij je downloads. Je kan deze pagina gerust sluiten.</span>';}}
+
+track('link geopend');
+hub();
+
+</script>
+</body>
+</html>

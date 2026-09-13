@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mathias Daeseleire — AI voor KMO's, zonder gedoe</title>
+<meta name="description" content="AI-strategie &amp; implementatie voor KMO's. Op maat, down-to-earth, met resultaat. Discovery, sparring, training en implementatie.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- ===== HEADER (fixed: ticker + nav, transparant boven de hero, blur na scroll) ===== -->
+<header class="site" id="sitehead">
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__track">
+      <div class="row">
+        <span class="item"><b>Doe nu de AI-scan</b><i></i></span>
+        <span class="item"><b>Ontdek meteen waar je best start</b><i></i></span>
+        <span class="item"><b>Onmiddellijk praktische inzichten</b><i></i></span>
+        <span class="item"><b>Doe nu de AI-scan</b><i></i></span>
+        <span class="item"><b>Ontdek meteen waar je best start</b><i></i></span>
+        <span class="item"><b>Onmiddellijk praktische inzichten</b><i></i></span>
+      </div>
+    </div>
+    <a class="ticker__cta" href="aiscan/"><span>Naar de AI-scan</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+  </div>
+  <nav class="nav">
+    <a class="brand" href="#top"><i></i>Mathias Daeseleire</a>
+    <div class="navlinks">
+      <a href="#aanbod">Aanbod</a>
+      <a href="#over">Over mij</a>
+      <a href="#nieuwsbrief">Nieuwsbrief</a>
+      <a href="#contact">Contact</a>
+      <a href="aiscan/">AI-scan</a>
+      <a class="navcta" href="#contact">Boek een gesprek</a>
+    </div>
+    <button class="navtoggle" id="navtoggle" aria-label="Menu openen" aria-expanded="false">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+    </button>
+  </nav>
+  <div id="navpanel" class="navpanel">
+    <a href="#aanbod">Aanbod</a>
+    <a href="#over">Over mij</a>
+    <a href="#nieuwsbrief">Nieuwsbrief</a>
+    <a href="#contact">Contact</a>
+    <a href="aiscan/">AI-scan</a>
+    <a class="btn btn-p" href="#contact">Boek een gesprek</a>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" id="top">
+    <div class="hero__grid">
+      <div>
+        <p class="eyebrow"><i></i>AI-partner voor zaakvoerders, teams en kmo's</p>
+        <h1>AI laten werken waar het <em>écht iets</em> oplevert.</h1>
+        <p class="lead">Ik help ondernemers en kmo's om artificiële intelligentie te gebruiken, daar waar het waarde biedt: waar je er écht iets mee bent, op maat van jou en je bedrijf.</p>
+        <div class="actions">
+          <a class="btn btn-p" href="#contact">Boek een kennismaking
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+          <a class="link-plain" href="#aanbod">Bekijk wat ik doe</a>
+        </div>
+      </div>
+      <div class="hero__portrait">
+        <!-- Vervang door je eigen portret: assets/img/portret.jpg (verhouding ongeveer 4:5) -->
+        <img src="assets/img/portret.jpg" alt="Portret van Mathias Daeseleire" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph-note',innerHTML:'Zet hier assets/img/portret.jpg'}))">
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HERKENNING ===== -->
+  <section id="herkenning">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Misschien herken je je bedrijf of jezelf wel in onderstaande situaties</h2>
+      </div>
+      <div class="recog">
+        <div class="recog__col">
+          <div class="recog__icon">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/><circle cx="12" cy="12" r="10"/></svg>
+          </div>
+          <p class="recog__label">Je zoekt nog waar je moet beginnen</p>
+          <div class="recog__items">
+            <div class="recog__item"><p>Je gebruikt ChatGPT bijna dagelijks, en het blijft bij losse gesprekken. Alles wat je bedrijf weet zit er niet in, en je collega's beginnen elke keer opnieuw van nul.</p></div>
+            <div class="recog__item"><p>Je zou graag een agent hebben die je mails opvolgt, of je verkoopcijfers in real time toont. Alleen weet je niet waar je begint, of je hebt er simpelweg de tijd niet voor.</p></div>
+            <div class="recog__item"><p>Er kruipt elke week een hoop tijd in bepaalde processen. Je voelt dat het anders kan, maar niemand heeft de tijd om uit te zoeken hoe, want de winkel moet blijven draaien.</p></div>
+            <div class="recog__item"><p>Er komt om de haverklap iemand langs die nu ook AI in zijn product heeft. Je kan moeilijk inschatten of daar iets in zit voor jullie, of dat je vooral voor een woord betaalt.</p></div>
+          </div>
+        </div>
+        <div class="recog__col">
+          <div class="recog__icon">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+          </div>
+          <p class="recog__label">Je bent vertrokken, maar het loopt niet door</p>
+          <div class="recog__items">
+            <div class="recog__item"><p>Iedereen bij jullie gebruikt AI op zijn eigen manier. Niemand heeft ooit afgesproken wat er wel en niet in zo'n tool mag, en ondertussen gaan er wel klantgegevens in.</p></div>
+            <div class="recog__item"><p>Er is al eens iets geprobeerd, en het is stilgevallen. Een tool aangekocht of een sessie laten geven, en drie maanden later gebruikt niemand het nog.</p></div>
+            <div class="recog__item"><p>Je eerste pilot draait. Alleen weet je niet goed of hij oplevert wat je hoopte, en ondertussen blijft de rest van het potentieel liggen.</p></div>
+            <div class="recog__item"><p>Je gelooft dat AI bepaalde processen fundamenteel verandert. Wat je zoekt is niet nog een presentatie daarover, maar de expertise en de slagkracht om het ook uitgevoerd te krijgen.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="recog__closer">
+        <div class="recog__closer-grid">
+          <div>
+            <h3>Herkenbaar?<br>Wees gerust.</h3>
+            <p>Dat heeft iedereen. AI verandert razendsnel, de weg ernaartoe voelt als een doolhof, en zoeken is normaal.</p>
+          </div>
+          <div>
+            <h3>Daarom wil ik je helpen.</h3>
+            <p>Want werk gaat toch wel heruitgevonden worden. Samen zoeken we, gestructureerd en pragmatisch, waar AI voor jou écht waarde oplevert. Niet zomaar een sparringpartner: iemand die met je meebouwt en het samen realiseert.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__track">
+      <div class="row">
+        <span class="item"><b>Strategie</b><i></i></span><span class="item"><b>Implementatie</b><i></i></span><span class="item"><b>Adoptie</b><i></i></span><span class="item"><b>Onderhoud</b><i></i></span>
+        <span class="item"><b>Strategie</b><i></i></span><span class="item"><b>Implementatie</b><i></i></span><span class="item"><b>Adoptie</b><i></i></span><span class="item"><b>Onderhoud</b><i></i></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== WAT IK DOE ===== -->
+  <section id="aanbod" class="bg-panel">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Wat ik doe</h2>
+        <p>Geen catalogus, geen vast parcours. Je begint waar het voor jou logisch is, meestal bij inzicht, en groeit van daar naar bouwen. Want advies is waar het begint, niet waar het eindigt.</p>
+      </div>
+
+      <div class="steps" id="stepsaccordion">
+        <div class="step open">
+          <button class="step__row" aria-expanded="true">
+            <span class="step__num">01</span>
+            <span class="step__title">Kickstart</span>
+            <span class="step__label">Hier begint het meestal</span>
+            <span class="step__toggle"></span>
+          </button>
+          <div class="step__body"><p>We gaan echt kijken: wat is er al, welke projecten lopen er, hoe wordt AI vandaag gebruikt, wat zijn de uitdagingen, waar wil je naartoe. Daarna bouwen we live, met jullie eigen documenten en jullie eigen mails. Zo vertrek je niet met theorie, maar met iets dat je meteen gebruikt.</p></div>
+        </div>
+        <div class="step">
+          <button class="step__row" aria-expanded="false">
+            <span class="step__num">02</span>
+            <span class="step__title">Waar de winst zit</span>
+            <span class="step__toggle"></span>
+          </button>
+          <div class="step__body"><p>We kijken zowel naar je departementen als naar je eigen activiteiten: waar kruipt het meeste tijd in, wat zorgt voor uitdagingen, wat gebeurt vandaag op een manier die beter kan. Je krijgt een lijst op volgorde van opbrengst, inclusief de dingen waar je beter geen AI voor gebruikt. Zo weet je precies waar je begint, en waarom.</p></div>
+        </div>
+        <div class="step">
+          <button class="step__row" aria-expanded="false">
+            <span class="step__num">03</span>
+            <span class="step__title">Je mensen meekrijgen</span>
+            <span class="step__label">Opleiding</span>
+            <span class="step__toggle"></span>
+          </button>
+          <div class="step__body"><p>Het hele team vertrekt op hetzelfde punt, daarna gaan we dieper in per rol, want verkoop en boekhouding hebben niets aan hetzelfde voorbeeld. Sleutelfiguren nemen het intern over, begeleid tot het vanzelf loopt. Zo blijft het niet aan mij hangen.</p></div>
+        </div>
+        <div class="step">
+          <button class="step__row" aria-expanded="false">
+            <span class="step__num">04</span>
+            <span class="step__title">Het plan voor één proces</span>
+            <span class="step__toggle"></span>
+          </button>
+          <div class="step__body"><p>We leggen vast hoe dat ene proces eruitziet, van begin tot eind: wat er in gaat, wie wat doet, wat er uit moet komen. Meteen spreken we af wat we meten, zodat je achteraf weet of het echt iets opleverde.</p></div>
+        </div>
+        <div class="step">
+          <button class="step__row" aria-expanded="false">
+            <span class="step__num">05</span>
+            <span class="step__title">Bouwen en in gebruik nemen</span>
+            <span class="step__label">Implementatie</span>
+            <span class="step__toggle"></span>
+          </button>
+          <div class="step__body"><p>We zetten het proces echt om, stap voor stap, en van dag één met je eigen mensen erbij. Zo volgt iedereen mee en blijft het niet hangen bij een demo die niemand meer opent.</p></div>
+        </div>
+        <div class="step">
+          <button class="step__row" aria-expanded="false">
+            <span class="step__num">06</span>
+            <span class="step__title">Blijven draaien</span>
+            <span class="step__toggle"></span>
+          </button>
+          <div class="step__body"><p>Ik blijf beschikbaar als klankbord. We gaan langs de afspraken: draait het nog, levert het nog op, wat is er veranderd. Kleine bijsturingen doen we meteen, zodat het geen project wordt dat stilletjes stilvalt.</p></div>
+        </div>
+      </div>
+
+      <p class="steps__closer">Daarnaast, op maat: Governance &amp; veilig AI-gebruik &middot; Agents voor directie &middot; Processen automatiseren &middot; Adoptie &amp; verandering.<br>Prijs altijd te bespreken: na een eerste gesprek, niet ervoor.</p>
+    </div>
+  </section>
+
+  <!-- ===== OVER MIJ ===== -->
+  <section id="over" class="about-section" style="padding:96px 0">
+    <div class="wrap">
+      <div class="about">
+        <div class="about__photo">
+          <img src="assets/img/portret.jpg" alt="Portret van Mathias Daeseleire" onerror="this.parentElement.style.background='rgba(255,255,255,.15)'">
+        </div>
+        <div class="about__body">
+          <p class="eyebrow-b">Over mij</p>
+          <h2 style="font-size:clamp(24px,3vw,34px);margin-bottom:22px">Waarom ik dit doe</h2>
+          <p>Ik geloof sterk in de ongelofelijke impact die AI op bedrijven kan hebben. De laatste jaren mocht ik dat vanop de eerste rij meemaken, dankzij mijn jaren als consultant. Wat me vooral opviel: de adoptie verschilt enorm, en de meeste bedrijven blijven hangen op het gewone gebruik van ChatGPT of Claude.</p>
+          <p>AI écht gebruiken om waarde te creëren vraagt meer dan kennis alleen. Het betekent processen hertekenen en samen bekijken hoe we activiteiten <b>AI-native</b> opbouwen: met het resultaat als doel, en pas daarna hoe je dat proces met AI bouwt. Fundamenteel anders dan een tool bovenop het bestaande werk zetten.</p>
+          <p>KMO's zijn de ondernemershartslag van België, en AI kan hun groeiverhaal echt versterken. Maar de realiteit is wat ze is. Er is weinig tijd voor, en evenmin de kennis om ermee te starten of verder op te schalen. Precies daarom wil ik hen helpen: als partner die meebouwt, op hun tempo, zonder omwegen.</p>
+          <p class="about__foot"><a href="https://www.linkedin.com/in/mathiasdaeseleire/" target="_blank" rel="noopener">Leer me kennen op LinkedIn →</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== INTAKE CTA (foto + periwinkle paneel) ===== -->
+  <section class="intake">
+    <div class="intake__img">
+      <!-- op de live site staat hier een gegenereerde/stock sfeerbeeld (geen foto van Mathias);
+           vervang gerust door een eigen beeld op assets/img/intake.jpg -->
+      <img src="assets/img/intake.jpg" alt="" onerror="this.remove()">
+    </div>
+    <div class="intake__panel">
+      <div>
+        <h2>Plan een intakegesprek</h2>
+        <p>We kijken of en op welke manier ik jullie kan voorthelpen. Je vertelt waar je staat, ik stel vragen, en nadien weet je eerlijk wat de volgende zinnige stap is. Zonder verplichting.</p>
+        <ul class="intake__list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>We bekijken samen waar je vandaag staat</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Je krijgt een eerlijk antwoord, ook als het is: nog niet nu</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Geen verkooppraatje, gewoon een gesprek</span></li>
+        </ul>
+        <a class="btn btn-onprimary" href="https://cal.com/mathiasdaeseleire/30min" target="_blank" rel="noopener">Plan een gesprek
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__track">
+      <div class="row">
+        <span class="item"><b>Discovery</b><i></i></span><span class="item"><b>Use cases</b><i></i></span><span class="item"><b>Sparring</b><i></i></span><span class="item"><b>Workshops</b><i></i></span>
+        <span class="item"><b>Discovery</b><i></i></span><span class="item"><b>Use cases</b><i></i></span><span class="item"><b>Sparring</b><i></i></span><span class="item"><b>Workshops</b><i></i></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== INSPIRATIE: NIEUWSBRIEF + SCAN ===== -->
+  <section id="nieuwsbrief">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Oke, nu nog wat inspiratie</h2>
+        <p>Twee manieren om alvast zelf op dreef te raken:</p>
+      </div>
+      <div class="werk">
+        <a href="https://mathiasdaeseleire.substack.com/" target="_blank" rel="noopener" style="display:block">
+          <div class="werk__item">
+            <div class="werk__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            </div>
+            <p class="eyebrow-small">Elke week in je mailbox</p>
+            <h4>Blijf bij met het AI-nieuws</h4>
+            <p>Het belangrijkste AI-nieuws van de week en de beste tools voor jouw bedrijf, in gewone mensentaal. In tien minuten blijf je up-to-date!</p>
+            <span class="link-arrow">Naar de nieuwsbrief
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </span>
+          </div>
+        </a>
+        <a href="aiscan/" style="display:block">
+          <div class="werk__item">
+            <div class="werk__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
+            </div>
+            <p class="eyebrow-small">Zelf aan de slag, vandaag nog</p>
+            <h4>Doe de AI-scan</h4>
+            <p>Nood aan een tool die bepaalt waar AI jou echt kan ondersteunen? De scan wijst je de kansen, en wat je morgen al kan doen om ermee aan de slag te gaan.</p>
+            <span class="link-arrow">Naar de AI-scan
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CONTACT (volle-breedte periwinkle band) ===== -->
+  <section id="contact">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow-b"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16v13H4z"/><path d="M4 6l8 7 8-7"/></svg>Contact</p>
+        <h2>Klaar om te starten?</h2>
+        <p>De eerste stap is bewust klein: een kennismaking zonder voorbereiding. Kies zelf hoe je die zet: een moment in de kalender of een berichtje. Prijs altijd te bespreken: na een eerste gesprek, niet ervoor.</p>
+      </div>
+
+      <div class="contact">
+        <div class="contact__col">
+          <div class="contact__col-head">
+            <span class="contact__col-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg></span>
+            <div>
+              <h3>Kies zelf een moment</h3>
+              <p class="hint">Direct in mijn agenda, zonder heen en weer mailen.</p>
+            </div>
+          </div>
+          <div class="cal-embed">
+            <iframe src="https://cal.com/mathiasdaeseleire/30min?embed=true" title="Boek een gesprek met Mathias Daeseleire" loading="lazy"></iframe>
+          </div>
+          <p class="note" style="margin-top:14px">Lukt het niet? <a href="https://cal.com/mathiasdaeseleire/30min" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline;text-underline-offset:3px">Open de kalender in een nieuw venster</a>.</p>
+        </div>
+        <div class="contact__col">
+          <div class="contact__col-head">
+            <span class="contact__col-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg></span>
+            <div>
+              <h3>Of laat iets weten</h3>
+              <p class="hint">Een vraag, een twijfel, alles is welkom.</p>
+            </div>
+          </div>
+          <form id="contactform" novalidate style="margin-top:24px">
+            <div class="f-row">
+              <div class="f"><label for="c_naam">Naam *</label><input id="c_naam" type="text" placeholder="Je naam" required></div>
+              <div class="f"><label for="c_email">E-mail *</label><input id="c_email" type="email" placeholder="naam@bedrijf.be" required></div>
+            </div>
+            <div class="f-row">
+              <div class="f"><label for="c_bedrijf">Bedrijf</label><input id="c_bedrijf" type="text" placeholder="Optioneel"></div>
+              <div class="f"><label for="c_onderwerp">Waarover?</label>
+                <select id="c_onderwerp">
+                  <option value="Kennismaking">Kennismaking</option>
+                  <option value="Specifieke vraag">Specifieke vraag</option>
+                  <option value="Discovery project">Discovery project</option>
+                  <option value="Training">Training</option>
+                </select>
+              </div>
+            </div>
+            <div class="f"><label for="c_bericht">Bericht *</label><textarea id="c_bericht" rows="4" placeholder="Waar wil je over praten? Een use case, een vraag, een twijfel, alles is welkom." required></textarea></div>
+            <p class="err hidden" id="cerr"></p>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px">
+              <button type="submit" class="btn btn-onprimary" id="csubmit" style="width:100%;justify-content:center">Verstuur bericht
+                <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </button>
+              <span class="note" id="cmsg"></span>
+              <p class="note">Je gegevens worden enkel gebruikt om te antwoorden. Geen spam, beloofd. Meer daarover in de <a href="privacy/" style="color:#fff;text-decoration:underline">privacyverklaring</a>.</p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site">
+  <div class="wrap">
+    <div class="footgrid">
+      <div class="footbrand">
+        <a class="brand" href="#top"><i></i>Mathias Daeseleire</a>
+        <p>AI laten werken waar het écht iets oplevert. Voor zaakvoerders, teams en kmo's: op jouw tempo, op maat.</p>
+      </div>
+      <div class="footcols">
+        <div class="footlinks">
+          <a href="#aanbod">Aanbod</a>
+          <a href="#over">Over mij</a>
+          <a href="https://mathiasdaeseleire.substack.com/" target="_blank" rel="noopener">Nieuwsbrief</a>
+          <a href="#contact">Contact</a>
+        </div>
+        <div class="footlinks">
+          <a href="aiscan/">AI-scan</a>
+          <a href="https://mathiasdaeseleire.substack.com/" target="_blank" rel="noopener">Substack</a>
+          <a href="https://www.linkedin.com/in/mathiasdaeseleire/" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="https://cal.com/mathiasdaeseleire/30min" target="_blank" rel="noopener">Agenda</a>
+        </div>
+      </div>
+    </div>
+    <div class="footlegal">
+      <p>&copy; 2026 Mathias Daeseleire. Vanuit eigen naam.</p>
+      <p>Veilig en juist gebruik van AI, dat is de missie.</p>
+    </div>
+    <div class="footlegal2">
+      <span>Mathias Daeseleire, handelend onder de naam Madaco</span>
+      <span>&middot;</span>
+      <span>[ondernemingsvorm] &middot; ondernemingsnummer [BE 0xxx.xxx.xxx]</span>
+      <span>&middot;</span>
+      <a href="mailto:mathias@madaco.be">mathias@madaco.be</a>
+      <span>&middot;</span>
+      <a href="privacy/">Privacyverklaring</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>

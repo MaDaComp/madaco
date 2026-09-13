@@ -1,0 +1,4 @@
+Zet hier je portretfoto als: portret.jpg (verhouding ongeveer 4:5, bv. 900x1125px)
+
+Zolang dat bestand er niet is, toont de hero-sectie op de homepage een
+duidelijke placeholdertekst in plaats van een kapotte afbeelding.
