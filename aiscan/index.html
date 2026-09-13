@@ -1205,13 +1205,15 @@ function submit(){
  e.classList.add('hidden');LEAD.ok=true;b.disabled=true;
  document.getElementById('lmsg').textContent='Momentje\u2026';
  track('e-mail achtergelaten');
- send().finally(()=>report(pending));}
+ report(pending);
+ send();}
 
 function send(){
  const payload={scan:pending,naam:A.L_name,email:A.L_email,
   functie:A.L_func,bedrijf:A.L_co,grootte:A.L_size,sector:A.L_sector||'',nieuwsbrief:!!A.L_news,
   rol:role?role.n:null,bron:BRON,samenvatting:HEAD[pending](),
-  antwoorden:Object.fromEntries(Object.entries(A).filter(([k])=>!k.startsWith('L_')))};
+  antwoorden:Object.fromEntries(Object.entries(A).filter(([k])=>!k.startsWith('L_'))),
+  rapport_html:buildRapportDoc(pending)};
  return supaInsert('scans',payload);}
 
 
@@ -1312,8 +1314,7 @@ function nextHint(){const left=Object.keys(done).filter(k=>!done[k]);
   bedrijf:'Breng in kaart waar in de organisatie het meeste te halen valt, met per gebied een test van een halfuur.',
   kader:'Bepaal of wat je bouwt ook blijft werken. Dit verfijnt meteen je bedrijfsrapport.'}[left[0]];}
 
-function download(kind){
- track('rapport gedownload',kind);
+function buildRapportDoc(kind){
  const kopie=root.cloneNode(true);
  kopie.querySelectorAll('[data-strip],.copy,.noprint').forEach(n=>n.remove());
  kopie.querySelectorAll('.track i').forEach(n=>{n.style.width=n.getAttribute('data-w')+'%';});
@@ -1322,13 +1323,17 @@ function download(kind){
  const body=kopie.innerHTML;
  const who=[A.L_co,A.L_name].filter(Boolean).map(esc).join(' \u00b7 ');
  const date=new Date().toLocaleDateString('nl-BE',{day:'numeric',month:'long',year:'numeric'});
- const doc='<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8">'+
+ return'<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8">'+
   '<meta name="viewport" content="width=device-width,initial-scale=1"><title>AI-scan: '+
   TITLES[kind]+(A.L_co?': '+esc(A.L_co):'')+'</title>'+
   '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">'+
   '<style>'+document.querySelector('style').textContent+'</style></head><body><div class="wrap">'+
   body+'<footer>AI-scan \u00b7 '+TITLES[kind]+(who?' \u00b7 '+who:'')+' \u00b7 '+date+
-  '. Dit rapport komt uit je eigen antwoorden en is een startpunt, geen audit.</footer></div></body></html>';
+  '. Dit rapport komt uit je eigen antwoorden en is een startpunt, geen audit.</footer></div></body></html>';}
+
+function download(kind){
+ track('rapport gedownload',kind);
+ const doc=buildRapportDoc(kind);
  const blob=new Blob([doc],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob);
  const a=document.createElement('a');
  const slug=(A.L_co||kind).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||kind;
